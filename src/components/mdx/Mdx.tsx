@@ -14,7 +14,7 @@ import { mdxComponents } from "./mdx-components";
  */
 export function Mdx({ source }: { source: string }) {
   return (
-    <div className="prose prose-zinc dark:prose-invert max-w-none">
+    <div className="prose max-w-none">
       <MDXRemote
         source={source}
         components={mdxComponents}

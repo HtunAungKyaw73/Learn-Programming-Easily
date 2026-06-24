@@ -55,11 +55,11 @@ export function Search({ docs }: { docs: SearchDoc[] }) {
       <button
         type="button"
         onClick={openSearch}
-        className="flex items-center gap-2 rounded-md border border-zinc-200 px-3 py-1.5 text-sm text-zinc-500 transition-colors hover:border-zinc-300 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600"
+        className="flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm text-muted transition-colors hover:border-terracotta hover:text-terracotta"
         aria-label="Search"
       >
         <span>Search</span>
-        <kbd className="hidden rounded bg-zinc-100 px-1.5 font-mono text-xs text-zinc-500 sm:inline dark:bg-zinc-800">
+        <kbd className="hidden rounded bg-surface px-1.5 font-mono text-xs text-faint sm:inline">
           ⌘K
         </kbd>
       </button>
@@ -70,7 +70,7 @@ export function Search({ docs }: { docs: SearchDoc[] }) {
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-full max-w-lg overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
+            className="w-full max-w-lg overflow-hidden rounded-xl border border-border bg-surface shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <form
@@ -84,12 +84,12 @@ export function Search({ docs }: { docs: SearchDoc[] }) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search articles…"
-                className="w-full border-b border-zinc-200 bg-transparent px-4 py-3.5 text-zinc-900 outline-none placeholder:text-zinc-400 dark:border-zinc-800 dark:text-zinc-100"
+                className="w-full border-b border-border bg-transparent px-4 py-3.5 text-ink outline-none placeholder:text-faint"
               />
             </form>
             <ul className="max-h-80 overflow-y-auto">
               {query.trim() && results.length === 0 && (
-                <li className="px-4 py-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
+                <li className="px-4 py-6 text-center text-sm text-faint">
                   No matches
                 </li>
               )}
@@ -98,13 +98,13 @@ export function Search({ docs }: { docs: SearchDoc[] }) {
                   <button
                     type="button"
                     onClick={() => go(doc.slug)}
-                    className="block w-full px-4 py-3 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                    className="block w-full px-4 py-3 text-left transition-colors hover:bg-paper"
                   >
-                    <span className="block font-medium text-zinc-900 dark:text-zinc-100">
+                    <span className="block font-medium text-ink">
                       {doc.title}
                     </span>
                     {doc.description && (
-                      <span className="mt-0.5 block truncate text-sm text-zinc-500 dark:text-zinc-400">
+                      <span className="mt-0.5 block truncate text-sm text-muted">
                         {doc.description}
                       </span>
                     )}

@@ -34,10 +34,10 @@ export default async function TagPage({
 
   return (
     <div>
-      <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+      <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">
         #{decoded}
       </h1>
-      <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+      <p className="mt-2 text-muted">
         {articles.length} article{articles.length === 1 ? "" : "s"}.
       </p>
       <div className="mt-6">
