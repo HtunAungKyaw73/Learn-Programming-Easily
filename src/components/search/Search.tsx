@@ -15,11 +15,13 @@ export function Search({ docs }: { docs: SearchDoc[] }) {
     [fuse, query],
   );
 
-  // ⌘K / Ctrl-K toggles; Esc closes.
+  // ⌘K / Ctrl-K toggles; Esc closes. Query is reset on each toggle so the
+  // panel always opens empty (reset lives in handlers, not an effect).
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
+        setQuery("");
         setOpen((v) => !v);
       } else if (e.key === "Escape") {
         setOpen(false);
@@ -29,16 +31,19 @@ export function Search({ docs }: { docs: SearchDoc[] }) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // Lock body scroll while open; reset query on close.
+  // Lock body scroll while the panel is open.
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = "";
-      };
-    }
-    setQuery("");
+    if (!open) return;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [open]);
+
+  function openSearch() {
+    setQuery("");
+    setOpen(true);
+  }
 
   function go(slug: string) {
     setOpen(false);
@@ -49,7 +54,7 @@ export function Search({ docs }: { docs: SearchDoc[] }) {
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={openSearch}
         className="flex items-center gap-2 rounded-md border border-zinc-200 px-3 py-1.5 text-sm text-zinc-500 transition-colors hover:border-zinc-300 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600"
         aria-label="Search"
       >

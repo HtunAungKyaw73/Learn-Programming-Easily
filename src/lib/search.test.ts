@@ -5,7 +5,8 @@ vi.mock("@/lib/mdx", () => ({
 }));
 
 import { getAllArticles } from "@/lib/mdx";
-import { getSearchDocs, createFuse, searchDocs } from "@/lib/search";
+import { createFuse, searchDocs } from "@/lib/search";
+import { getSearchDocs } from "@/lib/search-index";
 
 const article = (over: Record<string, unknown> = {}) => ({
   slug: "a",

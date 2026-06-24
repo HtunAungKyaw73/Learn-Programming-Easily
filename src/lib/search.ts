@@ -1,21 +1,14 @@
 import Fuse from "fuse.js";
-import { getAllArticles } from "@/lib/mdx";
+
+// Client-safe: this module is imported by the browser <Search> island, so it
+// must NOT pull in server-only code (e.g. the fs-backed MDX reader). The index
+// builder that touches the filesystem lives in `search-index.ts`.
 
 export interface SearchDoc {
   slug: string;
   title: string;
   description: string;
   tags: string[];
-}
-
-/** Build the client search index from visible articles (metadata only). */
-export function getSearchDocs(): SearchDoc[] {
-  return getAllArticles().map((a) => ({
-    slug: a.slug,
-    title: a.frontmatter.title,
-    description: a.frontmatter.description ?? "",
-    tags: a.frontmatter.tags ?? [],
-  }));
 }
 
 /** Configured Fuse instance: title weighted over tags/description. */
