@@ -45,3 +45,11 @@ model User {
   name         String?
   createdAt    DateTime @default(now())
 }
+
+model LoginAttempt {
+  id         Int      @id @default(autoincrement())
+  identifier String
+  createdAt  DateTime @default(now())
+
+  @@index([identifier, createdAt])
+}
