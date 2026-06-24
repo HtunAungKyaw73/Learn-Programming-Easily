@@ -18,9 +18,12 @@ export default async function HomePage() {
 
       <section className="mt-4">
         {articles.length === 0 ? (
-          <p className="py-16 text-center text-faint">
-            No articles yet. Check back soon.
-          </p>
+          <div className="py-20 text-center">
+            <p className="font-display text-xl font-semibold text-ink">
+              No articles yet
+            </p>
+            <p className="mt-2 font-prose text-muted">Check back soon.</p>
+          </div>
         ) : (
           articles.map((article) => (
             <ArticleCard key={article.slug} article={article} />

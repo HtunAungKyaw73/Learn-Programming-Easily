@@ -43,7 +43,7 @@ export function ArticleForm({ mode, initialData }: ArticleFormProps) {
 
   // Preview state
   const [showPreview, setShowPreview] = useState(false);
-  const [previewHtml, setPreviewHtml] = useState("");
+  const [previewBody, setPreviewBody] = useState("");
   const [previewError, setPreviewError] = useState("");
 
   // Error state
@@ -55,7 +55,7 @@ export function ArticleForm({ mode, initialData }: ArticleFormProps) {
     const timer = setTimeout(async () => {
       const result = await renderMdxPreview(content);
       if (result.ok) {
-        setPreviewHtml(result.body);
+        setPreviewBody(result.body);
         setPreviewError("");
       } else {
         setPreviewError(result.error);
@@ -267,10 +267,8 @@ export function ArticleForm({ mode, initialData }: ArticleFormProps) {
             <div className="min-h-[400px] rounded-md border border-border bg-surface p-6">
               {previewError ? (
                 <p className="text-sm text-red-600">{previewError}</p>
-              ) : previewHtml ? (
-                <div className="prose">
-                  <Mdx source={previewHtml} />
-                </div>
+              ) : previewBody ? (
+                <Mdx source={previewBody} />
               ) : (
                 <p className="text-sm text-faint">Nothing to preview.</p>
               )}
