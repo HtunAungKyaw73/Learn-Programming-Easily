@@ -6,6 +6,32 @@ import type { ArticleFrontmatter, ArticleListItem } from "@/types";
 const CONTENT_DIR = path.join(process.cwd(), "content");
 
 /**
+ * Serialize frontmatter + MDX body to a .mdx file in the content directory.
+ * Creates the directory if it doesn't exist.
+ */
+export function writeArticleFile(
+  slug: string,
+  frontmatter: ArticleFrontmatter,
+  content: string,
+): void {
+  if (!fs.existsSync(CONTENT_DIR)) {
+    fs.mkdirSync(CONTENT_DIR, { recursive: true });
+  }
+  const raw = matter.stringify(content, frontmatter);
+  fs.writeFileSync(getArticlePath(slug), raw, "utf-8");
+}
+
+/**
+ * Delete an MDX file from the content directory. No-op if missing.
+ */
+export function deleteArticleFile(slug: string): void {
+  const filePath = getArticlePath(slug);
+  if (fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+  }
+}
+
+/**
  * Calculate estimated reading time in minutes.
  * Average reading speed: ~200 words per minute.
  */
@@ -119,12 +145,4 @@ export function getArticlesByTag(tag: string): ArticleListItem[] {
   return getAllArticles().filter((a) => a.frontmatter.tags?.includes(tag));
 }
 
-/**
- * Generate a URL-safe slug from a title string.
- */
-export function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
+// slugify is now in @/lib/slug (client-safe, no fs imports)

@@ -4,8 +4,8 @@ import { Search } from "@/components/search/Search";
 import { getSearchDocs } from "@/lib/search-index";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 
-export function Header() {
-  const docs = getSearchDocs();
+export async function Header() {
+  const docs = await getSearchDocs();
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-paper/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-3xl items-center justify-between px-6">

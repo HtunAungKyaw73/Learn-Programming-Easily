@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock("@/lib/mdx", () => ({
-  getAllArticles: vi.fn(),
+vi.mock("@/lib/queries", () => ({
+  getPublicArticles: vi.fn(),
 }));
 
-import { getAllArticles } from "@/lib/mdx";
+import { getPublicArticles } from "@/lib/queries";
 import { createFuse, searchDocs } from "@/lib/search";
 import { getSearchDocs } from "@/lib/search-index";
 
@@ -15,16 +15,16 @@ const article = (over: Record<string, unknown> = {}) => ({
 });
 
 beforeEach(() => {
-  vi.mocked(getAllArticles).mockReset();
+  vi.mocked(getPublicArticles).mockReset();
 });
 
 describe("getSearchDocs", () => {
-  it("maps frontmatter, defaulting missing description and tags", () => {
-    vi.mocked(getAllArticles).mockReturnValue([
+  it("maps frontmatter, defaulting missing description and tags", async () => {
+    vi.mocked(getPublicArticles).mockResolvedValue([
       article({ title: "React Hooks", description: "useEffect", tags: ["react"] }),
       { slug: "b", readingTime: 2, frontmatter: { title: "Bare" } },
     ]);
-    expect(getSearchDocs()).toEqual([
+    await expect(getSearchDocs()).resolves.toEqual([
       { slug: "a", title: "React Hooks", description: "useEffect", tags: ["react"] },
       { slug: "b", title: "Bare", description: "", tags: [] },
     ]);

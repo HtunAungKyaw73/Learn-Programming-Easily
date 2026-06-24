@@ -1,9 +1,9 @@
-import { getAllArticles } from "@/lib/mdx";
+import { getPublicArticles } from "@/lib/queries";
 import { ArticleCard } from "@/components/site/ArticleCard";
 import { site } from "@/lib/site";
 
-export default function HomePage() {
-  const articles = getAllArticles();
+export default async function HomePage() {
+  const articles = await getPublicArticles();
 
   return (
     <div>

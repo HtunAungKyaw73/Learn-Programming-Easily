@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getAllTags, getArticlesByTag } from "@/lib/mdx";
+import { getAllTags } from "@/lib/mdx";
+import { getPublicArticlesByTag } from "@/lib/queries";
 import { ArticleCard } from "@/components/site/ArticleCard";
 
 type Params = { tag: string };
 
 export function generateStaticParams(): Params[] {
+  // Filesystem-based: works without DB at build time
   return getAllTags().map((tag) => ({ tag }));
 }
 
@@ -28,7 +30,7 @@ export default async function TagPage({
 }) {
   const { tag } = await params;
   const decoded = decodeURIComponent(tag);
-  const articles = getArticlesByTag(decoded);
+  const articles = await getPublicArticlesByTag(decoded);
 
   if (articles.length === 0) notFound();
 

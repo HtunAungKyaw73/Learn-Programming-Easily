@@ -1,0 +1,112 @@
+import Link from "next/link";
+import { getAdminArticles } from "@/lib/queries";
+import { formatDate } from "@/lib/format";
+import { DeleteButton } from "@/components/admin/DeleteButton";
+import { deleteArticle } from "@/lib/actions/article";
+
+export default async function AdminArticlesPage() {
+  const articles = await getAdminArticles("all");
+
+  return (
+    <div>
+      <div className="flex items-center justify-between">
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-ink">
+          Articles
+        </h1>
+        <Link
+          href="/admin/articles/new"
+          className="rounded-md bg-terracotta px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-terracotta-strong"
+        >
+          New Article
+        </Link>
+      </div>
+
+      {articles.length === 0 ? (
+        <p className="mt-8 text-center text-faint">
+          No articles yet.{" "}
+          <Link
+            href="/admin/articles/new"
+            className="text-terracotta hover:underline"
+          >
+            Create one
+          </Link>
+          .
+        </p>
+      ) : (
+        <div className="mt-6 overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-border text-faint">
+                <th className="pb-2 pr-4 font-medium">Status</th>
+                <th className="pb-2 pr-4 font-medium">Title</th>
+                <th className="hidden pb-2 pr-4 font-medium sm:table-cell">
+                  Tags
+                </th>
+                <th className="hidden pb-2 pr-4 font-medium md:table-cell">
+                  Date
+                </th>
+                <th className="pb-2 font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {articles.map((article) => (
+                <tr key={article.id} className="group">
+                  <td className="py-3 pr-4">
+                    <span
+                      className={`inline-block h-2 w-2 rounded-full ${
+                        article.published ? "bg-green-500" : "bg-zinc-400"
+                      }`}
+                      title={article.published ? "Published" : "Draft"}
+                    />
+                  </td>
+                  <td className="py-3 pr-4">
+                    <Link
+                      href={`/admin/articles/${article.slug}/edit`}
+                      className="font-medium text-ink transition-colors hover:text-terracotta"
+                    >
+                      {article.title}
+                    </Link>
+                  </td>
+                  <td className="hidden py-3 pr-4 sm:table-cell">
+                    <div className="flex flex-wrap gap-1">
+                      {article.tags.map((tag) => (
+                        <span
+                          key={tag.id}
+                          className="rounded-full bg-terracotta/10 px-2 py-0.5 text-xs text-terracotta"
+                        >
+                          {tag.name}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="hidden py-3 pr-4 text-faint md:table-cell">
+                    {article.publishedAt
+                      ? formatDate(article.publishedAt.toISOString())
+                      : "—"}
+                  </td>
+                  <td className="py-3">
+                    <div className="flex items-center gap-3">
+                      <Link
+                        href={`/admin/articles/${article.slug}/edit`}
+                        className="text-xs text-muted hover:text-ink"
+                      >
+                        Edit
+                      </Link>
+                      <DeleteButton
+                        action={async () => {
+                          "use server";
+                          await deleteArticle(article.slug);
+                        }}
+                        label="Delete"
+                      />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}

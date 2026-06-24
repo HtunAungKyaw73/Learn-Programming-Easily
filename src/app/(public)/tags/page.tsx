@@ -1,14 +1,14 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getAllTags, getArticlesByTag } from "@/lib/mdx";
+import { getPublicTagsWithCount } from "@/lib/queries";
 
 export const metadata: Metadata = {
   title: "Tags",
   description: "Browse articles by topic.",
 };
 
-export default function TagsPage() {
-  const tags = getAllTags();
+export default async function TagsPage() {
+  const tags = await getPublicTagsWithCount();
 
   return (
     <div>
@@ -24,13 +24,13 @@ export default function TagsPage() {
         ) : (
           tags.map((tag) => (
             <Link
-              key={tag}
-              href={`/tags/${tag}`}
+              key={tag.name}
+              href={`/tags/${tag.name}`}
               className="rounded-full border border-border px-4 py-1.5 text-sm text-muted transition-colors hover:border-terracotta hover:text-terracotta"
             >
-              #{tag}
+              #{tag.name}
               <span className="ml-2 text-faint">
-                {getArticlesByTag(tag).length}
+                {tag.count}
               </span>
             </Link>
           ))

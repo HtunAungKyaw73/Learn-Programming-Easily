@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getAllArticles } from "@/lib/mdx";
+import { getPublicArticles } from "@/lib/queries";
 import { ArticleCard } from "@/components/site/ArticleCard";
 
 export const metadata: Metadata = {
@@ -7,8 +7,8 @@ export const metadata: Metadata = {
   description: "All articles, newest first.",
 };
 
-export default function ArticlesPage() {
-  const articles = getAllArticles();
+export default async function ArticlesPage() {
+  const articles = await getPublicArticles();
 
   return (
     <div>
