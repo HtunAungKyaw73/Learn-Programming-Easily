@@ -13,12 +13,12 @@ Give the reader-facing site a refined print-magazine identity ("make hard ideas 
 - **Aesthetic:** Warm Paper editorial (cream paper, ink, terracotta accent, serif display).
 - **Fonts (4 roles):** Fraunces (display headlines), Newsreader (serif article prose), Geist Sans (UI chrome), Geist Mono (code). Fraunces + Newsreader added via `next/font/google`.
 - **Drop-cap:** yes, on the first paragraph of article prose.
-- **Dark mode:** warm-charcoal palette, switched by `prefers-color-scheme` (consistent with current site; no toggle).
+- **Dark mode + toggle:** warm-charcoal palette, **class-based** (`.dark` on `<html>`) via `next-themes`. A header toggle switches light ↔ dark; initial theme follows the OS (`defaultTheme="system"`, `enableSystem`), and the user's explicit choice is persisted (localStorage) with no flash on load.
 - **Tokens drive everything:** semantic CSS variables in `globals.css`, exposed as Tailwind v4 utilities; components use those utilities, not raw hex.
 
 ## Design tokens
 
-Defined in `src/app/globals.css`. Pattern: raw semantic vars under `:root` with a `@media (prefers-color-scheme: dark)` override, then mapped into Tailwind via `@theme inline { --color-*: var(--*) }` so utilities like `bg-paper`, `text-ink`, `text-terracotta` auto-switch by mode.
+Defined in `src/app/globals.css`. Pattern: raw semantic vars (light) under `:root` with a `.dark` override block, then mapped into Tailwind via `@theme inline { --color-*: var(--*) }` so utilities like `bg-paper`, `text-ink`, `text-terracotta` resolve to the active theme. Because dark mode is now class-based, add `@custom-variant dark (&:where(.dark, .dark *));` so any `dark:` utilities key off the `.dark` class (not `prefers-color-scheme`). `next-themes` toggles that class; with `defaultTheme="system"` it resolves the OS preference into the class on first paint, so an untouched visitor still gets their system theme.
 
 | token | light | dark | use |
 |-------|-------|------|-----|
@@ -46,9 +46,11 @@ Accessibility: `ink`/`muted`/`terracotta` on `paper` all meet WCAG AA for their 
 
 ## Component changes (files)
 
-- `src/app/layout.tsx` — load Fraunces + Newsreader, add their CSS vars to `<html>`; set body to `bg-paper text-ink`.
-- `src/app/globals.css` — token vars (light+dark), `@theme` mappings, prose color/font overrides scoped to the warm palette, **drop-cap** rule (`.prose > p:first-of-type::first-letter`: Fraunces, float left, ~3 lines, terracotta), code-block surface tinted to paper, keep existing Shiki dark-mode rules.
-- `src/components/site/Header.tsx` — paper/surface bg, Fraunces wordmark, terracotta hover.
+- `src/app/layout.tsx` — load Fraunces + Newsreader, add their CSS vars to `<html>`; add `suppressHydrationWarning` to `<html>`; wrap `{children}` in the theme provider; set body to `bg-paper text-ink`.
+- `src/app/globals.css` — token vars (`:root` light + `.dark` override), `@custom-variant dark`, `@theme` mappings, prose color/font overrides scoped to the warm palette, **drop-cap** rule (`.prose > p:first-of-type::first-letter`: Fraunces, float left, ~3 lines, terracotta), code-block surface tinted to paper. Convert the existing Shiki dark-mode rules from `@media (prefers-color-scheme: dark)` to `.dark` selectors so code blocks follow the toggle.
+- `src/components/site/ThemeProvider.tsx` — `"use client"` wrapper around `next-themes`' `ThemeProvider` (`attribute="class"`, `defaultTheme="system"`, `enableSystem`, `disableTransitionOnChange`).
+- `src/components/site/ThemeToggle.tsx` — `"use client"` button using `useTheme()`; sun/dark icons; toggles light ↔ dark; renders a stable placeholder until mounted to avoid a hydration mismatch.
+- `src/components/site/Header.tsx` — paper/surface bg, Fraunces wordmark, terracotta hover; mount `<ThemeToggle />` in the nav.
 - `src/components/site/Footer.tsx` — paper palette, gold hairline.
 - `src/components/site/ArticleCard.tsx` — uppercase terracotta **kicker** (first category, fallback first tag) → Fraunces headline → Newsreader dek → Geist-sans meta + tag pills (surface pills, border).
 - `src/app/(public)/page.tsx` — Fraunces hero statement on paper; featured lead-in styling.
@@ -57,11 +59,13 @@ Accessibility: `ink`/`muted`/`terracotta` on `paper` all meet WCAG AA for their 
 - `src/components/search/Search.tsx` — modal on `surface`, paper-consistent borders/hover, terracotta focus.
 - `src/components/mdx/Mdx.tsx` — `.prose` uses `font-prose`; drop existing zinc prose classes in favor of the warm overrides.
 
+**Dependency added:** `next-themes` (theme provider + persistence + no-flash).
+
 ## Out of scope
 
 - Admin UI (`/admin/*`) — stays as-is.
 - Routing, data fetching, MDX pipeline, search/RSS logic — unchanged.
-- Motion/animation, responsive QA polish, light/dark toggle — these belong to the later Phase 7 polish pass.
+- Motion/animation, responsive QA polish — these belong to the later Phase 7 polish pass.
 - New Shiki theme selection (keep github-light/dark; only tint the surrounding code-block surface).
 
 ## Testing / verification
@@ -70,3 +74,4 @@ Pure styling — **no unit tests** (asserting on CSS would be theater). Verifica
 1. `npm run build` succeeds and `npm run lint` is clean (fonts load, no type errors, no `react-hooks` regressions).
 2. Existing Vitest suite (search/rss/auth) stays green — the redesign must not touch logic.
 3. Manual visual review of every public route in **both** light and dark mode: home, an article (drop-cap + prose + code block), articles index, tags, tag detail, and the ⌘K search modal. Confirm tokens switch correctly and no element is unreadable (especially `faint` meta and terracotta-on-paper).
+4. **Theme toggle:** switching light ↔ dark updates the whole site live; the choice persists across a reload; a fresh visitor (no stored choice) gets their OS theme; no flash of the wrong theme on load (verify the `next-themes` inline script runs before paint).
