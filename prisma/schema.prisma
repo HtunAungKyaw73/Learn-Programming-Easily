@@ -37,3 +37,11 @@ model Category {
   slug     String    @unique
   articles Article[] @relation("ArticleCategories")
 }
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+}
