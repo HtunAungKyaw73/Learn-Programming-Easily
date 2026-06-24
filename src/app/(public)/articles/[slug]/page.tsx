@@ -8,6 +8,8 @@ import {
 } from "@/lib/mdx";
 import { Mdx } from "@/components/mdx/Mdx";
 import { formatDate } from "@/lib/format";
+import { site } from "@/lib/site";
+import { articleJsonLd } from "@/lib/seo";
 
 type Params = { slug: string };
 
@@ -24,14 +26,18 @@ export async function generateMetadata({
   const article = readArticleFile(slug);
   if (!article) return {};
 
-  const { title, description, coverImage } = article.frontmatter;
+  const { title, description, coverImage, publishedAt } = article.frontmatter;
   return {
     title,
     description,
+    alternates: { canonical: `/articles/${slug}` },
+    authors: [{ name: site.author }],
     openGraph: {
       type: "article",
       title,
       description,
+      url: `${site.url}/articles/${slug}`,
+      publishedTime: publishedAt,
       images: coverImage ? [coverImage] : undefined,
     },
   };
@@ -50,8 +56,23 @@ export default async function ArticlePage({
   const date = formatDate(frontmatter.publishedAt);
   const readingTime = calculateReadingTime(content);
 
+  const jsonLd = articleJsonLd({
+    slug,
+    title: frontmatter.title,
+    description: frontmatter.description,
+    publishedAt: frontmatter.publishedAt,
+    tags: frontmatter.tags,
+    coverImage: frontmatter.coverImage,
+    authorName: site.author,
+    baseUrl: site.url,
+  });
+
   return (
     <article>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Link
         href="/"
         className="text-sm text-muted transition-colors hover:text-terracotta"
