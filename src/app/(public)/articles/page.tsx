@@ -12,16 +12,16 @@ export default function ArticlesPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+      <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">
         Articles
       </h1>
-      <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+      <p className="mt-2 text-muted">
         {articles.length} article{articles.length === 1 ? "" : "s"}, newest
         first.
       </p>
       <div className="mt-6">
         {articles.length === 0 ? (
-          <p className="py-16 text-center text-zinc-500 dark:text-zinc-400">
+          <p className="py-16 text-center text-faint">
             No articles yet.
           </p>
         ) : (

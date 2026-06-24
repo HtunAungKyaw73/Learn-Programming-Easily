@@ -1,55 +1,103 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --paper: #fbf6ec;
+  --surface: #fffdf8;
+  --ink: #2a2017;
+  --muted: #5e5343;
+  --faint: #8a7c66;
+  --border: #e7dcc9;
+  --terracotta: #a23b2c;
+  --terracotta-strong: #872f22;
+  --gold: #c9a24b;
+}
+
+.dark {
+  --paper: #1a1613;
+  --surface: #221c17;
+  --ink: #ece3d4;
+  --muted: #b3a892;
+  --faint: #857a66;
+  --border: #3a322a;
+  --terracotta: #d9745f;
+  --terracotta-strong: #e68b77;
+  --gold: #d8b45e;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-border: var(--border);
+  --color-terracotta: var(--terracotta);
+  --color-terracotta-strong: var(--terracotta-strong);
+  --color-gold: var(--gold);
+  --font-display: var(--font-fraunces);
+  --font-prose: var(--font-newsreader);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
 }
 
-/* --- Shiki dual-theme: switch to the dark palette under dark color scheme.
-   Shiki emits the light color inline and the dark color in CSS variables. --- */
-@media (prefers-color-scheme: dark) {
-  .shiki,
-  .shiki span {
-    color: var(--shiki-dark) !important;
-    background-color: var(--shiki-dark-bg) !important;
-    font-style: var(--shiki-dark-font-style) !important;
-    font-weight: var(--shiki-dark-font-weight) !important;
-    text-decoration: var(--shiki-dark-text-decoration) !important;
-  }
+/* --- Article prose: warm palette + serif body --- */
+.prose {
+  --tw-prose-body: var(--muted);
+  --tw-prose-headings: var(--ink);
+  --tw-prose-links: var(--terracotta);
+  --tw-prose-bold: var(--ink);
+  --tw-prose-quotes: var(--ink);
+  --tw-prose-quote-borders: var(--gold);
+  --tw-prose-bullets: var(--faint);
+  --tw-prose-hr: var(--border);
+  --tw-prose-code: var(--ink);
+  --tw-prose-captions: var(--faint);
+  font-family: var(--font-prose);
+  font-size: 1.15rem;
+  line-height: 1.75;
+}
+.prose :is(h1, h2, h3, h4) {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
-/* --- Let Shiki own code-block presentation; strip Typography's defaults --- */
-.prose pre {
-  background-color: transparent;
-  padding: 0;
-  border: 1px solid var(--color-zinc-200);
+/* Drop cap on the first paragraph */
+.prose > p:first-of-type::first-letter {
+  font-family: var(--font-display);
+  font-weight: 600;
+  float: left;
+  font-size: 3.4em;
+  line-height: 0.78;
+  padding: 0.04em 0.1em 0 0;
+  color: var(--terracotta);
 }
-@media (prefers-color-scheme: dark) {
-  .prose pre {
-    border-color: var(--color-zinc-800);
-  }
-}
+
+/* --- Shiki: class-based dark + paper-tinted surface --- */
 .prose pre.shiki {
+  background-color: var(--surface) !important;
   padding: 1rem 1.25rem;
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   overflow-x: auto;
 }
-/* Typography wraps inline `code` in backticks; disable for cleaner rendering */
+.dark .prose pre.shiki,
+.dark .prose pre.shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
 .prose :where(code):not(:where(pre *))::before,
 .prose :where(code):not(:where(pre *))::after {
   content: none;

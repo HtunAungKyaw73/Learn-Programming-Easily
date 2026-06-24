@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Fraunces, Newsreader } from "next/font/google";
 import { site } from "@/lib/site";
+import { ThemeProvider } from "@/components/site/ThemeProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -11,6 +12,18 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -46,10 +59,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
+      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} ${newsreader.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
-        {children}
+      <body className="min-h-full flex flex-col font-sans bg-paper text-ink">
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

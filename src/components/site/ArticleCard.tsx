@@ -5,28 +5,34 @@ import type { ArticleListItem } from "@/types";
 export function ArticleCard({ article }: { article: ArticleListItem }) {
   const { slug, frontmatter, readingTime } = article;
   const date = formatDate(frontmatter.publishedAt);
+  const kicker = frontmatter.categories?.[0] ?? frontmatter.tags?.[0];
 
   return (
-    <article className="group border-b border-zinc-200/70 py-8 last:border-0 dark:border-zinc-800/70">
+    <article className="group border-b border-border py-8 last:border-0">
       <Link href={`/articles/${slug}`} className="block">
-        <div className="mb-2 flex items-center gap-3 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+        {kicker && (
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-terracotta">
+            {kicker}
+          </p>
+        )}
+        <h2 className="font-display text-2xl font-semibold leading-snug tracking-tight text-ink transition-colors group-hover:text-terracotta">
+          {frontmatter.title}
+        </h2>
+        {frontmatter.description && (
+          <p className="mt-2 font-prose text-lg leading-relaxed text-muted">
+            {frontmatter.description}
+          </p>
+        )}
+        <div className="mt-3 flex items-center gap-3 text-xs text-faint">
           {date && <time dateTime={frontmatter.publishedAt}>{date}</time>}
           {date && <span aria-hidden>·</span>}
           <span>{readingTime} min read</span>
           {frontmatter.featured && (
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
+            <span className="rounded-full bg-terracotta/10 px-2 py-0.5 font-medium text-terracotta">
               Featured
             </span>
           )}
         </div>
-        <h2 className="text-xl font-semibold tracking-tight text-zinc-900 transition-colors group-hover:text-blue-600 dark:text-zinc-100 dark:group-hover:text-blue-400">
-          {frontmatter.title}
-        </h2>
-        {frontmatter.description && (
-          <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-            {frontmatter.description}
-          </p>
-        )}
       </Link>
       {frontmatter.tags && frontmatter.tags.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
@@ -34,7 +40,7 @@ export function ArticleCard({ article }: { article: ArticleListItem }) {
             <Link
               key={tag}
               href={`/tags/${tag}`}
-              className="text-xs text-zinc-500 transition-colors hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400"
+              className="text-xs text-faint transition-colors hover:text-terracotta"
             >
               #{tag}
             </Link>

@@ -54,22 +54,22 @@ export default async function ArticlePage({
     <article>
       <Link
         href="/"
-        className="text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+        className="text-sm text-muted transition-colors hover:text-terracotta"
       >
         ← Back
       </Link>
 
-      <header className="mt-6 border-b border-zinc-200/70 pb-8 dark:border-zinc-800/70">
-        <div className="mb-3 flex items-center gap-3 text-sm text-zinc-500 dark:text-zinc-400">
+      <header className="mt-6 border-b border-border pb-8">
+        <div className="mb-3 flex items-center gap-3 text-sm text-faint">
           {date && <time dateTime={frontmatter.publishedAt}>{date}</time>}
           {date && <span aria-hidden>·</span>}
           <span>{readingTime} min read</span>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl dark:text-zinc-50">
+        <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-ink sm:text-4xl">
           {frontmatter.title}
         </h1>
         {frontmatter.description && (
-          <p className="mt-3 text-lg text-zinc-600 dark:text-zinc-400">
+          <p className="mt-3 font-prose text-xl leading-relaxed text-muted">
             {frontmatter.description}
           </p>
         )}
@@ -79,7 +79,7 @@ export default async function ArticlePage({
               <Link
                 key={tag}
                 href={`/tags/${tag}`}
-                className="text-sm text-zinc-500 transition-colors hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400"
+                className="text-sm text-faint transition-colors hover:text-terracotta"
               >
                 #{tag}
               </Link>
