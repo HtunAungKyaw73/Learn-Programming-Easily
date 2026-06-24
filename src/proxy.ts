@@ -1,8 +1,8 @@
 import NextAuth from "next-auth";
 import authConfig from "@/auth.config";
 
-const { auth: middleware } = NextAuth(authConfig);
+const { auth: proxy } = NextAuth(authConfig);
 
-export { middleware };
+export { proxy };
 
 export const config = { matcher: ["/admin/:path*"] };
