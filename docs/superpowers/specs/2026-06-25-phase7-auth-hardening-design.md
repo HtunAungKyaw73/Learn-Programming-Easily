@@ -137,3 +137,7 @@ The login form already shows a generic "Invalid email or password" on `null`; a 
 - A distinct "account locked, try later" message; CAPTCHA; per-account (vs per-IP) limits.
 - Replacing the temp admin (operational owner step, documented only).
 - Edge-runtime proxy (Next 16 doesn't support it; not needed).
+
+### Known residual risk (accepted for single-admin v1)
+
+`getClientIp` reads the first `x-forwarded-for` entry, which is **client-spoofable** — an attacker rotating the header gets a fresh bucket and can bypass the per-IP throttle (and can fill the shared `"unknown"` bucket to lock that path). For a single-admin blog behind Vercel this is an accepted speed-bump, not a wall. **Follow-up (backlog):** switch to a trusted IP source (Vercel `ipAddress()` / right-most trusted hop) and add a periodic global sweep of stale `LoginAttempt` rows.
