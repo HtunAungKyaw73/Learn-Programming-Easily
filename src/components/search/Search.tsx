@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import {
   createFuse,
@@ -100,7 +101,7 @@ export function Search({ docs }: { docs: SearchDoc[] }) {
         ref={triggerRef}
         type="button"
         onClick={openSearch}
-        className="flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm text-muted transition-colors hover:border-terracotta hover:text-terracotta"
+        className="flex cursor-pointer items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm text-muted transition-colors hover:border-terracotta hover:text-terracotta"
         aria-label="Search"
       >
         <svg
@@ -123,11 +124,12 @@ export function Search({ docs }: { docs: SearchDoc[] }) {
         </kbd>
       </button>
 
-      {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 p-4 pt-[15vh]"
-          onClick={() => setOpen(false)}
-        >
+      {open &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 p-4 pt-[15vh]"
+            onClick={() => setOpen(false)}
+          >
           <div
             ref={panelRef}
             role="dialog"
@@ -168,7 +170,7 @@ export function Search({ docs }: { docs: SearchDoc[] }) {
                     type="button"
                     onClick={() => go(doc.slug)}
                     onMouseEnter={() => setActive(i)}
-                    className={`block w-full px-4 py-3 text-left transition-colors ${
+                    className={`block w-full cursor-pointer px-4 py-3 text-left transition-colors ${
                       i === active ? "bg-paper" : "hover:bg-paper"
                     }`}
                   >
@@ -185,8 +187,9 @@ export function Search({ docs }: { docs: SearchDoc[] }) {
               ))}
             </ul>
           </div>
-        </div>
-      )}
+        </div>,
+          document.body,
+        )}
     </>
   );
 }
