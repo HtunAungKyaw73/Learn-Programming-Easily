@@ -90,7 +90,8 @@ model LoginAttempt {
 export const MAX_ATTEMPTS = 5;
 export const WINDOW_MS = 15 * 60 * 1000;
 
-export function getClientIp(request: Request): string;        // first x-forwarded-for, else "unknown"
+export function getClientIp(request: Request): string;        // trusted ipAddress() → x-real-ip → "unknown" (see resolved residual-risk note)
+export function sweepStaleAttempts(): Promise<number>;        // global prune of rows older than the window; returns rows removed
 export function checkRateLimit(ip: string): Promise<{ allowed: boolean; retryAfterSec: number }>;
 export function recordFailure(ip: string): Promise<void>;     // insert + prune this IP's rows older than the window
 export function recordSuccess(ip: string): Promise<void>;     // delete this IP's rows
@@ -114,7 +115,7 @@ The login form already shows a generic "Invalid email or password" on `null`; a 
 
 ## Error / edge handling
 
-- Missing `x-forwarded-for` → `getClientIp` returns `"unknown"`; all unknown-IP attempts share one bucket (acceptable; locally there's no proxy header).
+- No trusted IP (no Vercel `ipAddress()`, no `x-real-ip`) → `getClientIp` returns `"unknown"`; all unknown-IP attempts share one bucket (acceptable; locally there's no proxy). The spoofable first `x-forwarded-for` hop is not read — see the resolved residual-risk note below.
 - A rate-limited attempt and a wrong password both return `null` → identical UX, no enumeration.
 - `recordFailure` prunes stale rows for the IP so the table doesn't grow unbounded for a hammering attacker.
 - DB error inside `checkRateLimit`/`record*` propagates; `authorize` returning a rejected promise surfaces as a failed sign-in (fail-closed-ish). Acceptable.
@@ -138,6 +139,13 @@ The login form already shows a generic "Invalid email or password" on `null`; a 
 - Replacing the temp admin (operational owner step, documented only).
 - Edge-runtime proxy (Next 16 doesn't support it; not needed).
 
-### Known residual risk (accepted for single-admin v1)
+### Known residual risk — RESOLVED (2026-06-25 follow-up)
 
-`getClientIp` reads the first `x-forwarded-for` entry, which is **client-spoofable** — an attacker rotating the header gets a fresh bucket and can bypass the per-IP throttle (and can fill the shared `"unknown"` bucket to lock that path). For a single-admin blog behind Vercel this is an accepted speed-bump, not a wall. **Follow-up (backlog):** switch to a trusted IP source (Vercel `ipAddress()` / right-most trusted hop) and add a periodic global sweep of stale `LoginAttempt` rows.
+**Was:** `getClientIp` read the first `x-forwarded-for` entry, which is **client-spoofable** — an attacker rotating the header got a fresh bucket and could bypass the per-IP throttle (and could fill the shared `"unknown"` bucket to lock that path).
+
+**Fixed:**
+
+- **Trusted IP source.** `getClientIp` now keys on Vercel's `ipAddress(request)` (`@vercel/functions`), which the platform edge derives from the connection and a client cannot spoof. It falls back to a trusted-proxy `x-real-ip`, then `"unknown"` (local dev). The raw first `x-forwarded-for` hop is **no longer read at all**, so rotating that header can no longer mint fresh buckets. (Regression test: a request carrying only a spoofed `x-forwarded-for` resolves to `"unknown"`, not the forged IP.)
+- **Global sweep.** `recordFailure` only prunes the IP it just wrote, so rotating-IP attempts left orphan rows that never aged out. New `sweepStaleAttempts()` deletes every row with `createdAt < now − WINDOW_MS` across all identifiers, invoked by a Vercel cron (`vercel.json` → `/api/cron/sweep-login-attempts`, daily). The route is gated on `Authorization: Bearer <CRON_SECRET>` when `CRON_SECRET` is set (Vercel sends it automatically); unset locally.
+
+**Remaining caveat:** off-Vercel deployments without `x-real-ip` collapse to the shared `"unknown"` bucket — fine for this single-admin app, which targets Vercel.

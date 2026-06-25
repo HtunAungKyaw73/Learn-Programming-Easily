@@ -1,3 +1,4 @@
+import { ipAddress } from "@vercel/functions";
 import { prisma } from "@/lib/prisma";
 
 // DB-backed brute-force throttle, keyed by client IP. A failed attempt and a
@@ -5,11 +6,22 @@ import { prisma } from "@/lib/prisma";
 export const MAX_ATTEMPTS = 5;
 export const WINDOW_MS = 15 * 60 * 1000;
 
-/** First IP from x-forwarded-for, or "unknown" when no proxy header is present. */
+/**
+ * Trusted client IP for rate-limit keying.
+ *
+ * Uses Vercel's `ipAddress()`, which the platform edge derives from the
+ * connection (surfaced via `x-real-ip`) — a client cannot spoof it. We
+ * deliberately do NOT read the first `x-forwarded-for` entry: that hop is
+ * attacker-controlled, so rotating it would mint a fresh throttle bucket on
+ * every request. Falls back to a trusted-proxy `x-real-ip`, then `"unknown"`
+ * (local dev, where there is no proxy and all attempts share one bucket).
+ */
 export function getClientIp(request: Request): string {
-  const xff = request.headers.get("x-forwarded-for");
-  if (!xff) return "unknown";
-  return xff.split(",")[0]?.trim() || "unknown";
+  const trusted = ipAddress(request);
+  if (trusted) return trusted;
+  const realIp = request.headers.get("x-real-ip")?.trim();
+  if (realIp) return realIp;
+  return "unknown";
 }
 
 /** Whether this IP may attempt a login right now. */
@@ -38,4 +50,18 @@ export async function recordFailure(ip: string): Promise<void> {
 /** Clear an IP's attempts after a successful login. */
 export async function recordSuccess(ip: string): Promise<void> {
   await prisma.loginAttempt.deleteMany({ where: { identifier: ip } });
+}
+
+/**
+ * Global prune of stale rows across every identifier. `recordFailure` only
+ * prunes the IP it just wrote, so a rotating-IP attacker leaves orphan rows
+ * that never age out; a periodic sweep (Vercel cron) reaps them. Returns the
+ * number of rows removed.
+ */
+export async function sweepStaleAttempts(): Promise<number> {
+  const cutoff = new Date(Date.now() - WINDOW_MS);
+  const { count } = await prisma.loginAttempt.deleteMany({
+    where: { createdAt: { lt: cutoff } },
+  });
+  return count;
 }
