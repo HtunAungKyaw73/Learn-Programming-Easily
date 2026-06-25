@@ -16,10 +16,7 @@ export default function PublicLayout({
         Skip to content
       </a>
       <Header />
-      <main
-        id="main"
-        className="fade-in w-full flex-1 px-6 py-12"
-      >
+      <main id="main" className="fade-in w-full flex-1 py-12">
         <ViewTransition>{children}</ViewTransition>
       </main>
       <Footer />

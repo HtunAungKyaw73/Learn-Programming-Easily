@@ -8,6 +8,7 @@ import {
 } from "@/lib/mdx";
 import { Mdx } from "@/components/mdx/Mdx";
 import { TableOfContents } from "@/components/article/TableOfContents";
+import { Container } from "@/components/site/Container";
 import { formatDate } from "@/lib/format";
 import { site } from "@/lib/site";
 import { articleJsonLd } from "@/lib/seo";
@@ -72,7 +73,7 @@ export default async function ArticlePage({
   const toc = extractToc(content);
 
   return (
-    <div className="mx-auto max-w-3xl xl:grid xl:max-w-5xl xl:grid-cols-[minmax(0,1fr)_13rem] xl:gap-12">
+    <Container className="relative">
       <article>
         <script
           type="application/ld+json"
@@ -139,11 +140,11 @@ export default async function ArticlePage({
         </div>
       </article>
 
-      <aside className="hidden xl:block">
+      <aside className="absolute inset-y-0 left-full ml-8 hidden w-52 xl:block">
         <div className="sticky top-24">
           <TableOfContents items={toc} />
         </div>
       </aside>
-    </div>
+    </Container>
   );
 }
