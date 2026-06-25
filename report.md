@@ -7,6 +7,7 @@ github_username: HtunAungKyaw73
 personal_repo_url: https://github.com/HtunAungKyaw73/Learn-Programming-Easily
 project_summary: A single-author CMS for publishing programming articles, using a hybrid MDX+PostgreSQL content model with an admin panel, client-side search, RSS, and full SEO.
 slides_url: [slides/pitch.md](/slides/pitch.md)
+intro_slides_url: [slides/intro.md](/slides/intro.md)
 
 ## Methodology
 
@@ -25,3 +26,17 @@ I followed the **Superpowers methodology** — Spec Driven Development (SDD). Be
 ### Agent
 - path: .claude/agents/test-runner.md
 - what: A lightweight Haiku-powered agent that runs the Vitest suite under Node 22 and returns a terse pass/fail summary — used for quick CI-style feedback without leaving the Claude Code session.
+
+## Screenshots
+
+### Homepage (light)
+![Homepage in light mode](screenshots/home.png)
+
+### Homepage (dark)
+![Homepage in dark mode](screenshots/home-dark.png)
+
+### Article page
+![First article with table of contents](screenshots/article-react.png)
+
+### Admin sign-in
+![Admin login page](screenshots/admin-login.png)
