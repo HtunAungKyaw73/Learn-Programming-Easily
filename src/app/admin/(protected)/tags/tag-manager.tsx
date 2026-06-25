@@ -158,18 +158,34 @@ export function TagManager({
                     {tag._count.articles === 1 ? "" : "s"}
                   </span>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1">
                   <button
                     type="button"
                     onClick={() => {
                       setEditId(tag.id);
                       setEditName(tag.name);
                     }}
-                    className="text-xs text-muted hover:text-ink"
+                    aria-label="Edit"
+                    title="Edit"
+                    className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-muted transition-colors hover:bg-surface hover:text-terracotta"
                   >
-                    Edit
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                      <path d="m15 5 4 4" />
+                    </svg>
                   </button>
                   <DeleteButton
+                    icon
                     action={() => handleDelete(tag.id)}
                     label="Delete"
                   />
