@@ -8,7 +8,7 @@
   --surface: #fffdf8;
   --ink: #2a2017;
   --muted: #5e5343;
-  --faint: #8a7c66;
+  --faint: #6e6151;
   --border: #e7dcc9;
   --terracotta: #a23b2c;
   --terracotta-strong: #872f22;
@@ -20,7 +20,7 @@
   --surface: #221c17;
   --ink: #ece3d4;
   --muted: #b3a892;
-  --faint: #857a66;
+  --faint: #a99c84;
   --border: #3a322a;
   --terracotta: #d9745f;
   --terracotta-strong: #e68b77;
@@ -147,4 +147,10 @@ body {
   ::view-transition-new(*) {
     animation: none !important;
   }
+}
+
+/* --- Visible keyboard focus for elements that don't set their own --- */
+:focus-visible {
+  outline: 2px solid var(--terracotta);
+  outline-offset: 2px;
 }
