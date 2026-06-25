@@ -55,6 +55,15 @@ export function AdminNav({ email }: { email: string }) {
 
         {/* Right side */}
         <div className="hidden items-center gap-4 md:flex">
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-terracotta"
+          >
+            <ExternalLinkIcon />
+            View site
+          </a>
           <ThemeToggle />
           <span className="text-xs text-faint">{email}</span>
           <button
@@ -118,6 +127,16 @@ export function AdminNav({ email }: { email: string }) {
                 {link.label}
               </Link>
             ))}
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setOpen(false)}
+              className="inline-flex items-center gap-1.5 text-sm text-muted"
+            >
+              <ExternalLinkIcon />
+              View site
+            </a>
             <hr className="border-border" />
             <span className="text-xs text-faint">{email}</span>
             <button
@@ -131,5 +150,25 @@ export function AdminNav({ email }: { email: string }) {
         </div>
       )}
     </nav>
+  );
+}
+
+function ExternalLinkIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M15 3h6v6" />
+      <path d="M10 14 21 3" />
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6" />
+    </svg>
   );
 }
