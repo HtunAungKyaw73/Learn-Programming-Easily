@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import {
@@ -17,6 +23,15 @@ export function Search({ docs }: { docs: SearchDoc[] }) {
   const [active, setActive] = useState(0);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+
+  // Portal targets document.body, which only exists on the client. Gate the
+  // portal on a hydration-safe client flag so it never renders during SSR/
+  // hydration (false on the server, flips to true after the client mounts).
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   const fuse = useMemo(() => createFuse(docs), [docs]);
   const results = useMemo(
@@ -124,7 +139,8 @@ export function Search({ docs }: { docs: SearchDoc[] }) {
         </kbd>
       </button>
 
-      {open &&
+      {mounted &&
+        open &&
         createPortal(
           <div
             className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 p-4 pt-[15vh]"
