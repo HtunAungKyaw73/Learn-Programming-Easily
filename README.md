@@ -1,5 +1,7 @@
 # Learn Programming Easily
 
+**Live:** https://learn-programming-easily.vercel.app
+
 A single-author CMS for writing and publishing programming articles. The owner writes posts in an auth-protected admin panel; readers browse a fast, statically-generated public site with search, tags, RSS, and light/dark theming.
 
 The defining design choice is a **hybrid content model**: article **bodies** live as version-controlled `.mdx` files in [`/content`](content), while article **metadata** (title, slug, tags, publish status, dates) lives in **PostgreSQL**. You get IDE-editable, diffable prose *and* fast relational queries.
