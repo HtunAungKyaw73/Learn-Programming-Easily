@@ -3,11 +3,12 @@
 import { useState, useEffect, useCallback, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { TagInput } from "./TagInput";
-import { Mdx } from "@/components/mdx/Mdx";
+import { MdxPreview } from "@/components/mdx/MdxPreview";
 import { slugify } from "@/lib/slug";
 import { createArticle, updateArticle } from "@/lib/actions/article";
 import { renderMdxPreview } from "@/lib/actions/preview";
 import type { ArticleWithContent } from "@/types";
+import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 
 interface ArticleFormProps {
   mode: "create" | "edit";
@@ -43,7 +44,8 @@ export function ArticleForm({ mode, initialData }: ArticleFormProps) {
 
   // Preview state
   const [showPreview, setShowPreview] = useState(false);
-  const [previewBody, setPreviewBody] = useState("");
+  const [previewSource, setPreviewSource] =
+    useState<MDXRemoteSerializeResult | null>(null);
   const [previewError, setPreviewError] = useState("");
 
   // Error state
@@ -55,7 +57,7 @@ export function ArticleForm({ mode, initialData }: ArticleFormProps) {
     const timer = setTimeout(async () => {
       const result = await renderMdxPreview(content);
       if (result.ok) {
-        setPreviewBody(result.body);
+        setPreviewSource(result.source);
         setPreviewError("");
       } else {
         setPreviewError(result.error);
@@ -254,21 +256,74 @@ export function ArticleForm({ mode, initialData }: ArticleFormProps) {
             >
               Content (MDX)
             </label>
-            <button
-              type="button"
-              onClick={() => setShowPreview(!showPreview)}
-              className="rounded-md border border-border px-3 py-1 text-xs text-muted transition-colors hover:bg-paper hover:text-ink"
+            <div
+              role="tablist"
+              aria-label="Editor mode"
+              className="inline-flex items-center rounded-lg border border-border p-0.5"
             >
-              {showPreview ? "Edit" : "Preview"}
-            </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={!showPreview}
+                onClick={() => setShowPreview(false)}
+                className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                  showPreview
+                    ? "text-faint hover:text-ink"
+                    : "bg-surface text-terracotta shadow-sm"
+                }`}
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                </svg>
+                Write
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={showPreview}
+                onClick={() => setShowPreview(true)}
+                className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                  showPreview
+                    ? "bg-surface text-terracotta shadow-sm"
+                    : "text-faint hover:text-ink"
+                }`}
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                Preview
+              </button>
+            </div>
           </div>
 
           {showPreview ? (
             <div className="min-h-[400px] rounded-md border border-border bg-surface p-6">
               {previewError ? (
                 <p className="text-sm text-red-600">{previewError}</p>
-              ) : previewBody ? (
-                <Mdx source={previewBody} />
+              ) : previewSource ? (
+                <MdxPreview source={previewSource} />
               ) : (
                 <p className="text-sm text-faint">Nothing to preview.</p>
               )}
