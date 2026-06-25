@@ -1,9 +1,10 @@
 import { site } from "@/lib/site";
+import { Container } from "@/components/site/Container";
 
 export function Footer() {
   return (
     <footer className="mt-24 border-t border-border">
-      <div className="mx-auto flex max-w-3xl flex-col gap-2 px-6 py-10 text-sm text-faint sm:flex-row sm:items-center sm:justify-between">
+      <Container className="flex flex-col gap-2 py-10 text-sm text-faint sm:flex-row sm:items-center sm:justify-between">
         <p>
           © {new Date().getFullYear()} {site.author}
         </p>
@@ -12,7 +13,7 @@ export function Footer() {
             RSS
           </a>
         </div>
-      </div>
+      </Container>
     </footer>
   );
 }
