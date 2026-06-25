@@ -17,7 +17,14 @@ export function writeArticleFile(
   if (!fs.existsSync(CONTENT_DIR)) {
     fs.mkdirSync(CONTENT_DIR, { recursive: true });
   }
-  const raw = matter.stringify(content, frontmatter);
+  // gray-matter serializes frontmatter via js-yaml, whose dump() throws
+  // "unacceptable kind of an object to dump [object Undefined]" on undefined
+  // values. Optional fields arrive as undefined (e.g. empty coverImage), so
+  // strip undefined keys to omit them rather than serialize them.
+  const cleaned = Object.fromEntries(
+    Object.entries(frontmatter).filter(([, value]) => value !== undefined),
+  );
+  const raw = matter.stringify(content, cleaned);
   fs.writeFileSync(getArticlePath(slug), raw, "utf-8");
 }
 
