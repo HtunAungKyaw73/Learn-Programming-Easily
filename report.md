@@ -6,7 +6,7 @@
 github_username: HtunAungKyaw73
 personal_repo_url: https://github.com/HtunAungKyaw73/Learn-Programming-Easily
 project_summary: A single-author CMS for publishing programming articles, using a hybrid MDX+PostgreSQL content model with an admin panel, client-side search, RSS, and full SEO.
-slides_url: [slides/pitch.md](https://github.com/HtunAungKyaw73/Learn-Programming-Easily/tree/main/slides)
+slides_url: [slides/pitch.md](/slides/pitch.md)
 
 ## Methodology
 
