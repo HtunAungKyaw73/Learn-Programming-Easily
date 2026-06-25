@@ -5,7 +5,7 @@ vi.mock("@/lib/queries", () => ({
 }));
 
 import { getPublicArticles } from "@/lib/queries";
-import { createFuse, searchDocs } from "@/lib/search";
+import { createFuse, searchDocs, nextActiveIndex } from "@/lib/search";
 import { getSearchDocs } from "@/lib/search-index";
 
 const article = (over: Record<string, unknown> = {}) => ({
@@ -63,5 +63,19 @@ describe("searchDocs", () => {
 
   it("matches on description", () => {
     expect(searchDocs(fuse, "outer joins")[0].slug).toBe("sql");
+  });
+});
+
+describe("nextActiveIndex", () => {
+  it("ArrowDown increments, clamped at length-1", () => {
+    expect(nextActiveIndex(0, "ArrowDown", 3)).toBe(1);
+    expect(nextActiveIndex(2, "ArrowDown", 3)).toBe(2);
+  });
+  it("ArrowUp decrements, clamped at 0", () => {
+    expect(nextActiveIndex(2, "ArrowUp", 3)).toBe(1);
+    expect(nextActiveIndex(0, "ArrowUp", 3)).toBe(0);
+  });
+  it("returns 0 when there are no results", () => {
+    expect(nextActiveIndex(0, "ArrowDown", 0)).toBe(0);
   });
 });

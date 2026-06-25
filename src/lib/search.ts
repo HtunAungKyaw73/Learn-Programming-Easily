@@ -30,3 +30,14 @@ export function searchDocs(fuse: Fuse<SearchDoc>, query: string): SearchDoc[] {
   if (!q) return [];
   return fuse.search(q).map((r) => r.item);
 }
+
+/** Next highlighted-result index for arrow-key navigation (clamped to range). */
+export function nextActiveIndex(
+  current: number,
+  key: "ArrowUp" | "ArrowDown",
+  length: number,
+): number {
+  if (length === 0) return 0;
+  if (key === "ArrowDown") return Math.min(current + 1, length - 1);
+  return Math.max(current - 1, 0);
+}
