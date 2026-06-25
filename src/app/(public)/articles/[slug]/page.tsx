@@ -141,7 +141,7 @@ export default async function ArticlePage({
       </article>
 
       <aside className="absolute inset-y-0 left-full ml-8 hidden w-52 xl:block">
-        <div className="sticky top-24">
+        <div className="sticky top-24 max-h-[calc(100dvh-8rem)] overflow-y-auto overscroll-contain pr-2">
           <TableOfContents items={toc} />
         </div>
       </aside>
