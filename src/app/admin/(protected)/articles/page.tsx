@@ -86,6 +86,29 @@ export default async function AdminArticlesPage() {
                   </td>
                   <td className="py-3">
                     <div className="flex items-center gap-1">
+                      <a
+                        href={`/articles/${article.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="View on site"
+                        title="View on site"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface hover:text-terracotta"
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                          <circle cx="12" cy="12" r="3" />
+                        </svg>
+                      </a>
                       <Link
                         href={`/admin/articles/${article.slug}/edit`}
                         aria-label="Edit"
