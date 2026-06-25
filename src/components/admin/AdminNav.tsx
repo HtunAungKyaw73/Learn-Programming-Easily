@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { ThemeToggle } from "@/components/site/ThemeToggle";
 
 const NAV_LINKS = [
   { href: "/admin", label: "Dashboard" },
@@ -54,6 +55,7 @@ export function AdminNav({ email }: { email: string }) {
 
         {/* Right side */}
         <div className="hidden items-center gap-4 md:flex">
+          <ThemeToggle />
           <span className="text-xs text-faint">{email}</span>
           <button
             type="button"
@@ -64,35 +66,38 @@ export function AdminNav({ email }: { email: string }) {
           </button>
         </div>
 
-        {/* Mobile hamburger */}
-        <button
-          type="button"
-          onClick={() => setOpen(!open)}
-          className="text-muted md:hidden"
-          aria-label="Toggle navigation"
-        >
-          <svg
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
+        {/* Mobile controls */}
+        <div className="flex items-center gap-1 md:hidden">
+          <ThemeToggle />
+          <button
+            type="button"
+            onClick={() => setOpen(!open)}
+            className="text-muted"
+            aria-label="Toggle navigation"
           >
-            {open ? (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            ) : (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            )}
-          </svg>
-        </button>
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              {open ? (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              ) : (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              )}
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}
