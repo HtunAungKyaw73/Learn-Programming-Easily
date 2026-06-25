@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
+import { Logo } from "@/components/site/Logo";
+import { site } from "@/lib/site";
 
 const NAV_LINKS = [
   { href: "/admin", label: "Dashboard" },
@@ -26,11 +28,8 @@ export function AdminNav({ email }: { email: string }) {
   return (
     <nav className="border-b border-border bg-surface">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
-        <Link
-          href="/admin"
-          className="font-display text-lg font-semibold text-ink"
-        >
-          LPE
+        <Link href="/admin" aria-label={`${site.name} admin — dashboard`}>
+          <Logo label={site.shortName} />
         </Link>
 
         {/* Desktop nav */}

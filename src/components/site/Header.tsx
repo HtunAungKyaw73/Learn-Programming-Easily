@@ -4,18 +4,15 @@ import { Search } from "@/components/search/Search";
 import { getSearchDocs } from "@/lib/search-index";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { Container } from "@/components/site/Container";
+import { Logo } from "@/components/site/Logo";
 
 export async function Header() {
   const docs = await getSearchDocs();
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-paper/85 backdrop-blur">
       <Container className="flex h-16 items-center justify-between">
-        <Link
-          href="/"
-          className="font-display text-base font-semibold tracking-tight text-ink sm:text-lg"
-        >
-          <span className="sm:hidden">{site.shortName}</span>
-          <span className="hidden sm:inline">{site.name}</span>
+        <Link href="/" aria-label={`${site.name} — home`}>
+          <Logo wordmarkClassName="hidden sm:inline" />
         </Link>
         <nav className="flex items-center gap-3 text-sm sm:gap-5">
           <Search docs={docs} />
