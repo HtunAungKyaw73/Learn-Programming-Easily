@@ -154,3 +154,16 @@ body {
   outline: 2px solid var(--terracotta);
   outline-offset: 2px;
 }
+
+/* --- Anchor navigation: smooth scroll, clear the sticky header --- */
+html {
+  scroll-behavior: smooth;
+}
+.prose :is(h2, h3) {
+  scroll-margin-top: 6rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
