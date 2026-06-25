@@ -6,5 +6,8 @@
       "Bash(npx next *)",
       "Bash(npx tailwindcss *)"
     ]
+  },
+  "enabledPlugins": {
+    "superpowers@superpowers-marketplace": true
   }
 }
