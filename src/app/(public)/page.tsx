@@ -1,12 +1,13 @@
 import { getPublicArticles } from "@/lib/queries";
 import { ArticleCard } from "@/components/site/ArticleCard";
+import { Container } from "@/components/site/Container";
 import { site } from "@/lib/site";
 
 export default async function HomePage() {
   const articles = await getPublicArticles();
 
   return (
-    <div>
+    <Container>
       <section className="border-b border-border pb-12">
         <h1 className="font-display text-4xl font-semibold leading-[1.05] tracking-tight text-ink sm:text-5xl">
           {site.name}
@@ -30,6 +31,6 @@ export default async function HomePage() {
           ))
         )}
       </section>
-    </div>
+    </Container>
   );
 }

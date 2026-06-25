@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getAllTags } from "@/lib/mdx";
 import { getPublicArticlesByTag } from "@/lib/queries";
 import { ArticleCard } from "@/components/site/ArticleCard";
+import { Container } from "@/components/site/Container";
 
 type Params = { tag: string };
 
@@ -35,7 +36,7 @@ export default async function TagPage({
   if (articles.length === 0) notFound();
 
   return (
-    <div>
+    <Container>
       <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">
         #{decoded}
       </h1>
@@ -47,6 +48,6 @@ export default async function TagPage({
           <ArticleCard key={article.slug} article={article} />
         ))}
       </div>
-    </div>
+    </Container>
   );
 }

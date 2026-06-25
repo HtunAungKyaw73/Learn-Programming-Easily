@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getPublicArticles } from "@/lib/queries";
 import { ArticleCard } from "@/components/site/ArticleCard";
+import { Container } from "@/components/site/Container";
 
 export const metadata: Metadata = {
   title: "Articles",
@@ -11,7 +12,7 @@ export default async function ArticlesPage() {
   const articles = await getPublicArticles();
 
   return (
-    <div>
+    <Container>
       <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">
         Articles
       </h1>
@@ -33,6 +34,6 @@ export default async function ArticlesPage() {
           ))
         )}
       </div>
-    </div>
+    </Container>
   );
 }

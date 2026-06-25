@@ -7,6 +7,7 @@ import {
   readArticleFile,
 } from "@/lib/mdx";
 import { Mdx } from "@/components/mdx/Mdx";
+import { Container } from "@/components/site/Container";
 import { formatDate } from "@/lib/format";
 import { site } from "@/lib/site";
 import { articleJsonLd } from "@/lib/seo";
@@ -68,8 +69,9 @@ export default async function ArticlePage({
   });
 
   return (
-    <article>
-      <script
+    <Container>
+      <article>
+        <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
@@ -113,5 +115,6 @@ export default async function ArticlePage({
         <Mdx source={content} />
       </div>
     </article>
+    </Container>
   );
 }

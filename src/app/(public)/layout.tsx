@@ -18,7 +18,7 @@ export default function PublicLayout({
       <Header />
       <main
         id="main"
-        className="fade-in mx-auto w-full max-w-3xl flex-1 px-6 py-12"
+        className="fade-in w-full flex-1 px-6 py-12"
       >
         <ViewTransition>{children}</ViewTransition>
       </main>

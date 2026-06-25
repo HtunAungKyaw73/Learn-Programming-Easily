@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getPublicTagsWithCount } from "@/lib/queries";
+import { Container } from "@/components/site/Container";
 
 export const metadata: Metadata = {
   title: "Tags",
@@ -11,7 +12,7 @@ export default async function TagsPage() {
   const tags = await getPublicTagsWithCount();
 
   return (
-    <div>
+    <Container>
       <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">
         Tags
       </h1>
@@ -36,6 +37,6 @@ export default async function TagsPage() {
           ))
         )}
       </div>
-    </div>
+    </Container>
   );
 }
