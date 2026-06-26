@@ -65,6 +65,7 @@ This is a **single-author CMS** for publishing programming articles. It was firs
 | 8 | [Design System](08-design-system.md) | The warm-paper editorial look, fonts, light/dark theming |
 | 9 | [Table of Contents](09-table-of-contents.md) | Per-article ToC with scroll-spy — a full feature walkthrough |
 | 10 | [DB-Backed Content](10-db-content-migration.md) | Moving bodies file→Postgres for publish-without-deploy (on-demand ISR) — supersedes the file model in chs. 2 & 6 |
+| 11 | [GFM Table Support](11-gfm-table-support.md) | Adding `remark-gfm` so pipe-delimited Markdown tables render in MDX article bodies |
 
 ## Tech stack at a glance
 
