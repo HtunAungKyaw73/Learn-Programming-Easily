@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getAllTags } from "@/lib/mdx";
-import { getPublicArticlesByTag } from "@/lib/queries";
+import { getPublicArticlesByTag, getPublicTagsWithCount } from "@/lib/queries";
 import { ArticleCard } from "@/components/site/ArticleCard";
 import { Container } from "@/components/site/Container";
 
 type Params = { tag: string };
 
-export function generateStaticParams(): Params[] {
-  // Filesystem-based: works without DB at build time
-  return getAllTags().map((tag) => ({ tag }));
+export async function generateStaticParams(): Promise<Params[]> {
+  const tags = await getPublicTagsWithCount();
+  return tags.filter((t) => t.count > 0).map((t) => ({ tag: t.name }));
 }
 
 export async function generateMetadata({
