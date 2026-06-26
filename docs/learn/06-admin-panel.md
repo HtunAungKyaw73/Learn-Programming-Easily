@@ -2,6 +2,8 @@
 
 > The owner's workspace: create, edit, publish, and delete articles — keeping the `.mdx` files and the database in sync. Built on Server Actions, not API routes.
 
+> ⚠️ **Later evolution:** the "write the `.mdx` file *and* the DB row" sync described here no longer applies. Article bodies now live in PostgreSQL only, and saving publishes live via on-demand revalidation (no file writes, no redeploy) — see [Chapter 10 — DB-Backed Content](10-db-content-migration.md).
+
 ## The problem
 
 The owner needs to manage content from a browser, and every save must keep **two stores in agreement**:

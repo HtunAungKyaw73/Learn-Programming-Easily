@@ -17,12 +17,14 @@ Code references like [`src/lib/mdx.ts`](../../src/lib/mdx.ts) are clickable.
 
 ## The 30-second mental model
 
-This is a **single-author CMS** for publishing programming articles. The defining design decision is the **hybrid content model**:
+This is a **single-author CMS** for publishing programming articles. It was first built around a **hybrid content model** (bodies in files, metadata in the DB), then evolved to store everything in the database. Chapters 1–9 below describe the project as it was built; **[Chapter 10](10-db-content-migration.md)** explains the move to DB-backed content and is the current state.
 
-- **Article *body*** lives as **`.mdx` files** in [`/content`](../../content) — version-controlled, editable in your IDE.
-- **Article *metadata*** (title, slug, tags, publish status, dates) lives in **PostgreSQL** via Prisma.
+**As originally built (chapters 2 & 6):**
 
-The **public site** is statically generated (fast, SEO-friendly). The **admin panel** is a dynamic, auth-protected area where the owner writes articles; saving an article writes the MDX file *and* syncs metadata to the database.
+- **Article *body*** lived as **`.mdx` files** in `/content` — version-controlled, editable in your IDE.
+- **Article *metadata*** (title, slug, tags, publish status, dates) lived in **PostgreSQL** via Prisma.
+
+**Today ([Chapter 10](10-db-content-migration.md)):** both the body *and* metadata live in **PostgreSQL**; there is no `/content` directory. The **public site** is statically generated and regenerated **on-demand (ISR)**, so the **admin panel** publishes changes live with no redeploy. The diagram below shows the original file-based flow — useful history, but note bodies now come from the DB.
 
 ```
                 ┌─────────────────────────────────────────────┐
@@ -62,6 +64,7 @@ The **public site** is statically generated (fast, SEO-friendly). The **admin pa
 | 7 | [Polish](07-polish.md) | App states, SEO (sitemap, JSON-LD, OG images), accessibility & responsiveness |
 | 8 | [Design System](08-design-system.md) | The warm-paper editorial look, fonts, light/dark theming |
 | 9 | [Table of Contents](09-table-of-contents.md) | Per-article ToC with scroll-spy — a full feature walkthrough |
+| 10 | [DB-Backed Content](10-db-content-migration.md) | Moving bodies file→Postgres for publish-without-deploy (on-demand ISR) — supersedes the file model in chs. 2 & 6 |
 
 ## Tech stack at a glance
 

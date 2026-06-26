@@ -2,6 +2,8 @@
 
 > Turn `.mdx` files on disk into rendered article HTML, with frontmatter, syntax-highlighted code, and smart links.
 
+> ⚠️ **Later evolution:** this chapter describes the original **file-based** hybrid model. Article bodies were since moved into PostgreSQL (the `/content` files and file readers no longer exist). The *rendering* is unchanged, but storage is now the DB — see [Chapter 10 — DB-Backed Content](10-db-content-migration.md).
+
 ## The problem
 
 Articles need to be:
