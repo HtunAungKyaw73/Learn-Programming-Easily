@@ -47,7 +47,7 @@ export async function getPublicArticleBySlug(
   });
   if (!article) return null;
   const { body, ...rest } = article;
-  return { ...rest, content: body ?? "" };
+  return { ...rest, content: body };
 }
 
 /**
@@ -73,7 +73,7 @@ export async function getAdminArticleBySlug(
   });
   if (!article) return null;
   const { body, ...rest } = article;
-  return { ...rest, content: body ?? "" };
+  return { ...rest, content: body };
 }
 
 /**
