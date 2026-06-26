@@ -3,9 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/slug";
-import { writeArticleFile, deleteArticleFile } from "@/lib/mdx";
+import { calculateReadingTime } from "@/lib/mdx";
 import { requireAuth } from "./auth-guard";
-import type { ArticleFrontmatter } from "@/types";
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -53,21 +52,6 @@ async function upsertCategories(names: string[]) {
   return results;
 }
 
-/**
- * Build frontmatter object from form data for MDX serialization.
- */
-function toFrontmatter(data: ArticleFormData): ArticleFrontmatter {
-  return {
-    title: data.title,
-    description: data.description || undefined,
-    tags: data.tagNames.length > 0 ? data.tagNames : undefined,
-    categories: data.categoryNames.length > 0 ? data.categoryNames : undefined,
-    published: data.published || undefined,
-    featured: data.featured || undefined,
-    publishedAt: data.publishedAt || undefined,
-    coverImage: data.coverImage || undefined,
-  };
-}
 
 export async function createArticle(data: ArticleFormData): Promise<ActionResult> {
   await requireAuth();
@@ -84,13 +68,7 @@ export async function createArticle(data: ArticleFormData): Promise<ActionResult
   }
 
   try {
-    const frontmatter = toFrontmatter(data);
-    writeArticleFile(slug, frontmatter, data.content);
-
-    const readingTime = Math.max(
-      1,
-      Math.ceil(data.content.trim().split(/\s+/).length / 200),
-    );
+    const readingTime = calculateReadingTime(data.content);
 
     await prisma.article.create({
       data: {
@@ -102,6 +80,7 @@ export async function createArticle(data: ArticleFormData): Promise<ActionResult
         publishedAt: data.publishedAt ? new Date(data.publishedAt) : null,
         coverImage: data.coverImage || null,
         readingTime,
+        body: data.content,
         tags: { connect: await upsertTags(data.tagNames) },
         categories: { connect: await upsertCategories(data.categoryNames) },
       },
@@ -112,6 +91,7 @@ export async function createArticle(data: ArticleFormData): Promise<ActionResult
     revalidatePath("/");
     revalidatePath("/articles");
     revalidatePath("/tags");
+    revalidatePath("/rss.xml");
     return { ok: true };
   } catch (err) {
     return { ok: false, error: `Failed to create article: ${String(err)}` };
@@ -138,17 +118,7 @@ export async function updateArticle(
   }
 
   try {
-    // Rewrite MDX file
-    const frontmatter = toFrontmatter(data);
-    if (slug !== originalSlug) {
-      deleteArticleFile(originalSlug);
-    }
-    writeArticleFile(slug, frontmatter, data.content);
-
-    const readingTime = Math.max(
-      1,
-      Math.ceil(data.content.trim().split(/\s+/).length / 200),
-    );
+    const readingTime = calculateReadingTime(data.content);
 
     // Diff tags
     const currentArticle = await prisma.article.findUnique({
@@ -178,6 +148,7 @@ export async function updateArticle(
         publishedAt: data.publishedAt ? new Date(data.publishedAt) : null,
         coverImage: data.coverImage || null,
         readingTime,
+        body: data.content,
         tags: {
           connect: await upsertTags(toConnectTags),
           disconnect: toDisconnectTags.map((name) => ({ name })),
@@ -194,6 +165,7 @@ export async function updateArticle(
     revalidatePath("/");
     revalidatePath("/articles");
     revalidatePath("/tags");
+    revalidatePath("/rss.xml");
     revalidatePath(`/articles/${slug}`);
     if (slug !== originalSlug) revalidatePath(`/articles/${originalSlug}`);
     return { ok: true };
@@ -206,7 +178,6 @@ export async function deleteArticle(slug: string): Promise<ActionResult> {
   await requireAuth();
 
   try {
-    deleteArticleFile(slug);
     await prisma.article.delete({ where: { slug } });
 
     revalidatePath("/admin");
@@ -214,6 +185,7 @@ export async function deleteArticle(slug: string): Promise<ActionResult> {
     revalidatePath("/");
     revalidatePath("/articles");
     revalidatePath("/tags");
+    revalidatePath("/rss.xml");
     return { ok: true };
   } catch (err) {
     return { ok: false, error: `Failed to delete article: ${String(err)}` };
@@ -233,16 +205,11 @@ export async function togglePublished(slug: string): Promise<ActionResult> {
       data: { published: newPublished },
     });
 
-    // Sync frontmatter
-    const mdx = (await import("@/lib/mdx")).readArticleFile(slug);
-    if (mdx) {
-      writeArticleFile(slug, { ...mdx.frontmatter, published: newPublished }, mdx.content);
-    }
-
     revalidatePath("/admin");
     revalidatePath("/admin/articles");
     revalidatePath("/");
     revalidatePath("/articles");
+    revalidatePath("/rss.xml");
     return { ok: true };
   } catch (err) {
     return { ok: false, error: `Failed to toggle publish: ${String(err)}` };
@@ -261,12 +228,6 @@ export async function toggleFeatured(slug: string): Promise<ActionResult> {
       where: { slug },
       data: { featured: newFeatured },
     });
-
-    // Sync frontmatter
-    const mdx = (await import("@/lib/mdx")).readArticleFile(slug);
-    if (mdx) {
-      writeArticleFile(slug, { ...mdx.frontmatter, featured: newFeatured }, mdx.content);
-    }
 
     revalidatePath("/admin");
     revalidatePath("/admin/articles");
