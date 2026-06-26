@@ -19,6 +19,7 @@ model Article {
   updatedAt   DateTime @updatedAt
   readingTime Int?
   coverImage  String?
+  body        String?
 
   tags       Tag[]      @relation("ArticleTags")
   categories Category[] @relation("ArticleCategories")
