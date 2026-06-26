@@ -1,10 +1,14 @@
 import { prisma } from "@/lib/prisma";
-import { readArticleFile } from "@/lib/mdx";
 import type {
   AdminArticleListItem,
   ArticleListItem,
   ArticleWithContent,
 } from "@/types";
+
+const articleInclude = {
+  tags: { select: { id: true, name: true, slug: true } },
+  categories: { select: { id: true, name: true, slug: true } },
+} as const;
 
 type ArticleFilter = "all" | "published" | "drafts";
 
@@ -32,27 +36,44 @@ export async function getAdminArticles(
 }
 
 /**
- * Admin edit: DB metadata + MDX body from disk.
+ * Public article: published-only, body mapped to content.
+ */
+export async function getPublicArticleBySlug(
+  slug: string,
+): Promise<ArticleWithContent | null> {
+  const article = await prisma.article.findFirst({
+    where: { slug, published: true },
+    include: articleInclude,
+  });
+  if (!article) return null;
+  const { body, ...rest } = article;
+  return { ...rest, content: body ?? "" };
+}
+
+/**
+ * Published slugs for generateStaticParams.
+ */
+export async function getPublishedSlugs(): Promise<string[]> {
+  const rows = await prisma.article.findMany({
+    where: { published: true },
+    select: { slug: true },
+  });
+  return rows.map((r) => r.slug);
+}
+
+/**
+ * Admin edit: DB metadata + body from DB column.
  */
 export async function getAdminArticleBySlug(
   slug: string,
 ): Promise<ArticleWithContent | null> {
   const article = await prisma.article.findUnique({
     where: { slug },
-    include: {
-      tags: { select: { id: true, name: true, slug: true } },
-      categories: { select: { id: true, name: true, slug: true } },
-    },
+    include: articleInclude,
   });
   if (!article) return null;
-
-  const mdx = readArticleFile(slug);
-  if (!mdx) return null;
-
-  return {
-    ...article,
-    content: mdx.content,
-  };
+  const { body, ...rest } = article;
+  return { ...rest, content: body ?? "" };
 }
 
 /**

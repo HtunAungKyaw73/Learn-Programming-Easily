@@ -4,6 +4,8 @@ export {
   getArticleStats,
   getPublicArticles,
   getPublicArticlesByTag,
+  getPublicArticleBySlug,
+  getPublishedSlugs,
 } from "./articles";
 
 export {
