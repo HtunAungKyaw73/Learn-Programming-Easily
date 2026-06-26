@@ -15,6 +15,7 @@
     "db:studio": "prisma studio",
     "admin:create": "tsx scripts/create-admin.ts",
     "content:import": "tsx scripts/import-content.ts",
+    "backfill:body": "tsx scripts/backfill-body.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
