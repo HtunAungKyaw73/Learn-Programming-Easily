@@ -1,11 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import {
-  calculateReadingTime,
-  getAllArticles,
-  readArticleFile,
-} from "@/lib/mdx";
+import { getPublicArticleBySlug, getPublishedSlugs } from "@/lib/queries";
 import { Mdx } from "@/components/mdx/Mdx";
 import { TableOfContents } from "@/components/article/TableOfContents";
 import { Container } from "@/components/site/Container";
@@ -16,8 +12,9 @@ import { extractToc } from "@/lib/toc";
 
 type Params = { slug: string };
 
-export function generateStaticParams(): Params[] {
-  return getAllArticles().map((a) => ({ slug: a.slug }));
+export async function generateStaticParams(): Promise<Params[]> {
+  const slugs = await getPublishedSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -26,21 +23,21 @@ export async function generateMetadata({
   params: Promise<Params>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const article = readArticleFile(slug);
+  const article = await getPublicArticleBySlug(slug);
   if (!article) return {};
 
-  const { title, description, coverImage, publishedAt } = article.frontmatter;
+  const { title, description, coverImage, publishedAt } = article;
   return {
     title,
-    description,
+    description: description ?? undefined,
     alternates: { canonical: `/articles/${slug}` },
     authors: [{ name: site.author }],
     openGraph: {
       type: "article",
       title,
-      description,
+      description: description ?? undefined,
       url: `${site.url}/articles/${slug}`,
-      publishedTime: publishedAt,
+      publishedTime: publishedAt?.toISOString(),
       images: coverImage ? [coverImage] : undefined,
     },
   };
@@ -52,20 +49,22 @@ export default async function ArticlePage({
   params: Promise<Params>;
 }) {
   const { slug } = await params;
-  const article = readArticleFile(slug);
+  const article = await getPublicArticleBySlug(slug);
   if (!article) notFound();
 
-  const { frontmatter, content } = article;
-  const date = formatDate(frontmatter.publishedAt);
-  const readingTime = calculateReadingTime(content);
+  const { title, description, content } = article;
+  const tags = article.tags.map((t) => t.name);
+  const publishedAtIso = article.publishedAt?.toISOString();
+  const date = formatDate(publishedAtIso);
+  const readingTime = article.readingTime ?? 1;
 
   const jsonLd = articleJsonLd({
     slug,
-    title: frontmatter.title,
-    description: frontmatter.description,
-    publishedAt: frontmatter.publishedAt,
-    tags: frontmatter.tags,
-    coverImage: frontmatter.coverImage,
+    title,
+    description: description ?? undefined,
+    publishedAt: publishedAtIso,
+    tags,
+    coverImage: article.coverImage ?? undefined,
     authorName: site.author,
     baseUrl: site.url,
   });
@@ -88,21 +87,21 @@ export default async function ArticlePage({
 
         <header className="mt-6 border-b border-border pb-8">
           <div className="mb-3 flex items-center gap-3 text-sm text-faint">
-            {date && <time dateTime={frontmatter.publishedAt}>{date}</time>}
+            {date && <time dateTime={publishedAtIso}>{date}</time>}
             {date && <span aria-hidden>·</span>}
             <span>{readingTime} min read</span>
           </div>
           <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-ink sm:text-4xl">
-            {frontmatter.title}
+            {title}
           </h1>
-          {frontmatter.description && (
+          {description && (
             <p className="mt-3 font-prose text-xl leading-relaxed text-muted">
-              {frontmatter.description}
+              {description}
             </p>
           )}
-          {frontmatter.tags && frontmatter.tags.length > 0 && (
+          {tags.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
-              {frontmatter.tags.map((tag) => (
+              {tags.map((tag) => (
                 <Link
                   key={tag}
                   href={`/tags/${tag}`}
