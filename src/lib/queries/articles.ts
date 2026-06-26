@@ -92,8 +92,7 @@ export async function getArticleStats(): Promise<{
 }
 
 /**
- * Public listing: published articles transformed to ArticleListItem shape.
- * Keeps the same interface as the filesystem-based getAllArticles().
+ * Public listing of published articles as ArticleListItem.
  */
 export async function getPublicArticles(): Promise<ArticleListItem[]> {
   const articles = await prisma.article.findMany({

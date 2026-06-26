@@ -10,6 +10,18 @@ const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 type ActionResult = { ok: true } | { ok: false; error: string };
 
+/** Revalidate every public surface an article change can affect. */
+function revalidatePublicSurfaces(slug?: string) {
+  revalidatePath("/admin");
+  revalidatePath("/admin/articles");
+  revalidatePath("/");
+  revalidatePath("/articles");
+  revalidatePath("/tags");
+  revalidatePath("/rss.xml");
+  revalidatePath("/sitemap.xml");
+  if (slug) revalidatePath(`/articles/${slug}`);
+}
+
 interface ArticleFormData {
   title: string;
   slug: string;
@@ -86,12 +98,7 @@ export async function createArticle(data: ArticleFormData): Promise<ActionResult
       },
     });
 
-    revalidatePath("/admin");
-    revalidatePath("/admin/articles");
-    revalidatePath("/");
-    revalidatePath("/articles");
-    revalidatePath("/tags");
-    revalidatePath("/rss.xml");
+    revalidatePublicSurfaces(slug);
     return { ok: true };
   } catch (err) {
     return { ok: false, error: `Failed to create article: ${String(err)}` };
@@ -160,13 +167,7 @@ export async function updateArticle(
       },
     });
 
-    revalidatePath("/admin");
-    revalidatePath("/admin/articles");
-    revalidatePath("/");
-    revalidatePath("/articles");
-    revalidatePath("/tags");
-    revalidatePath("/rss.xml");
-    revalidatePath(`/articles/${slug}`);
+    revalidatePublicSurfaces(slug);
     if (slug !== originalSlug) revalidatePath(`/articles/${originalSlug}`);
     return { ok: true };
   } catch (err) {
@@ -180,12 +181,7 @@ export async function deleteArticle(slug: string): Promise<ActionResult> {
   try {
     await prisma.article.delete({ where: { slug } });
 
-    revalidatePath("/admin");
-    revalidatePath("/admin/articles");
-    revalidatePath("/");
-    revalidatePath("/articles");
-    revalidatePath("/tags");
-    revalidatePath("/rss.xml");
+    revalidatePublicSurfaces(slug);
     return { ok: true };
   } catch (err) {
     return { ok: false, error: `Failed to delete article: ${String(err)}` };
@@ -205,11 +201,7 @@ export async function togglePublished(slug: string): Promise<ActionResult> {
       data: { published: newPublished },
     });
 
-    revalidatePath("/admin");
-    revalidatePath("/admin/articles");
-    revalidatePath("/");
-    revalidatePath("/articles");
-    revalidatePath("/rss.xml");
+    revalidatePublicSurfaces(slug);
     return { ok: true };
   } catch (err) {
     return { ok: false, error: `Failed to toggle publish: ${String(err)}` };
@@ -229,9 +221,7 @@ export async function toggleFeatured(slug: string): Promise<ActionResult> {
       data: { featured: newFeatured },
     });
 
-    revalidatePath("/admin");
-    revalidatePath("/admin/articles");
-    revalidatePath("/");
+    revalidatePublicSurfaces(slug);
     return { ok: true };
   } catch (err) {
     return { ok: false, error: `Failed to toggle featured: ${String(err)}` };

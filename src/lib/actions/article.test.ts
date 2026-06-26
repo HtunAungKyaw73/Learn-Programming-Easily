@@ -11,14 +11,17 @@ vi.mock("@/lib/prisma", () => ({
 }));
 
 import { prisma } from "@/lib/prisma";
-import { createArticle } from "@/lib/actions/article";
+import { createArticle, togglePublished } from "@/lib/actions/article";
 
 const findUnique = vi.mocked(prisma.article.findUnique);
 const create = vi.mocked(prisma.article.create);
+const update = vi.mocked(prisma.article.update);
 
 beforeEach(() => {
   findUnique.mockReset();
   create.mockReset();
+  update.mockReset();
+  vi.resetModules();
 });
 
 const form = {
@@ -47,5 +50,19 @@ describe("createArticle", () => {
         data: expect.objectContaining({ slug: "hello-world", body: "# Hello\n\nBody." }),
       }),
     );
+  });
+});
+
+describe("togglePublished", () => {
+  it("revalidates the article page, tags, and sitemap", async () => {
+    findUnique.mockResolvedValue({ id: 1, slug: "hello-world", published: false } as never);
+    update.mockResolvedValue({ id: 1 } as never);
+    const { revalidatePath } = await import("next/cache");
+
+    await togglePublished("hello-world");
+
+    expect(revalidatePath).toHaveBeenCalledWith("/articles/hello-world");
+    expect(revalidatePath).toHaveBeenCalledWith("/tags");
+    expect(revalidatePath).toHaveBeenCalledWith("/sitemap.xml");
   });
 });

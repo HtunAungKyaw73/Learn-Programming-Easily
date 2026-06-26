@@ -29,9 +29,8 @@ export interface ArticleWithContent extends ArticleMeta {
 }
 
 /**
- * Lightweight article descriptor derived directly from an MDX file's
- * frontmatter (filesystem-first, no DB round-trip). Used by public listing
- * pages until DB metadata sync lands in the admin phase.
+ * Lightweight article descriptor populated from a DB row. Used by public
+ * listing pages.
  */
 export interface ArticleListItem {
   slug: string;
