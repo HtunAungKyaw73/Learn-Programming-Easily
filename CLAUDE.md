@@ -28,7 +28,7 @@ A content management system for writing and publishing programming articles. The
 - `src/app/(public)/` — public-facing routes (homepage, articles, tags)
 - `src/app/admin/` — protected admin routes (dashboard, CRUD)
 - `src/app/api/` — API routes (auth, CRUD, RSS)
-- `src/components/` — React components (public/, admin/, ui/)
+- `src/components/` — React components (site/, admin/, article/, mdx/, search/)
 - `src/lib/` — utilities (prisma client, auth config, DB queries, MDX rendering, search, RSS)
 - `src/types/` — shared TypeScript types
 
