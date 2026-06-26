@@ -1,15 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock("@/lib/mdx", () => ({ getAllArticles: vi.fn() }));
+vi.mock("@/lib/queries", () => ({ getPublicArticles: vi.fn() }));
 
-import { getAllArticles } from "@/lib/mdx";
+import { getPublicArticles } from "@/lib/queries";
 import { buildRssXml } from "@/lib/rss";
 
-beforeEach(() => vi.mocked(getAllArticles).mockReset());
+const getPublic = vi.mocked(getPublicArticles);
+
+beforeEach(() => getPublic.mockReset());
 
 describe("buildRssXml", () => {
-  it("includes published articles and is well-formed RSS", () => {
-    vi.mocked(getAllArticles).mockReturnValue([
+  it("includes returned articles and is well-formed RSS", async () => {
+    getPublic.mockResolvedValue([
       {
         slug: "hello-world",
         readingTime: 1,
@@ -22,7 +24,7 @@ describe("buildRssXml", () => {
         },
       },
     ]);
-    const xml = buildRssXml();
+    const xml = await buildRssXml();
     expect(xml).toContain("<rss");
     expect(xml).toContain("<channel>");
     expect(xml).toContain("<item>");
@@ -30,21 +32,10 @@ describe("buildRssXml", () => {
     expect(xml).toContain("/articles/hello-world");
   });
 
-  it("excludes drafts even outside production", () => {
-    vi.mocked(getAllArticles).mockReturnValue([
-      {
-        slug: "draft",
-        readingTime: 1,
-        frontmatter: { title: "Secret Draft", published: false },
-      },
-      {
-        slug: "live",
-        readingTime: 1,
-        frontmatter: { title: "Live Post", published: true },
-      },
-    ]);
-    const xml = buildRssXml();
-    expect(xml).toContain("Live Post");
-    expect(xml).not.toContain("Secret Draft");
+  it("renders an empty channel when there are no published articles", async () => {
+    getPublic.mockResolvedValue([]);
+    const xml = await buildRssXml();
+    expect(xml).toContain("<channel>");
+    expect(xml).not.toContain("<item>");
   });
 });
