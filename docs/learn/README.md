@@ -24,31 +24,31 @@ This is a **single-author CMS** for publishing programming articles. It was firs
 - **Article *body*** lived as **`.mdx` files** in `/content` — version-controlled, editable in your IDE.
 - **Article *metadata*** (title, slug, tags, publish status, dates) lived in **PostgreSQL** via Prisma.
 
-**Today ([Chapter 10](10-db-content-migration.md)):** both the body *and* metadata live in **PostgreSQL**; there is no `/content` directory. The **public site** is statically generated and regenerated **on-demand (ISR)**, so the **admin panel** publishes changes live with no redeploy. The diagram below shows the original file-based flow — useful history, but note bodies now come from the DB.
+**Today ([Chapter 10](10-db-content-migration.md)):** both the body *and* metadata live in **PostgreSQL**; there is no `/content` directory. The **public site** is statically generated and regenerated **on-demand (ISR)**, so the **admin panel** publishes changes live with no redeploy. The current flow:
 
 ```
                 ┌─────────────────────────────────────────────┐
-                │                  Reader                     │
+                │                  Reader                      │
                 └───────────────────┬─────────────────────────┘
                                     │ visits
-                       ┌────────────▼────────────┐
-                       │   Public site (SSG)     │  fast, cached, SEO
-                       │  / /articles /tags ...  │
-                       └────────────┬────────────┘
+                       ┌────────────▼─────────────┐
+                       │ Public site (SSG + ISR)  │  fast, cached, SEO
+                       │  / /articles /tags ...   │
+                       └────────────┬─────────────┘
                           reads     │
-              ┌───────────────────┐ │ ┌────────────────────────┐
-              │  /content/*.mdx   │◄┘ │  PostgreSQL (Prisma)   │
-              │  (article bodies) │   │  (article metadata)    │
-              └─────────▲─────────┘   └───────────▲────────────┘
-                        │ writes both              │
-                       ┌┴──────────────────────────┴┐
-                       │   Admin panel (dynamic)     │  auth-protected
-                       │   /admin/*  Server Actions  │
-                       └────────────▲────────────────┘
+                                    ▼
+                       ┌──────────────────────────┐
+                       │    PostgreSQL (Prisma)    │  bodies + metadata
+                       └────────────▲─────────────┘
+                          writes    │  → revalidatePath → live, no redeploy
+                       ┌────────────┴─────────────┐
+                       │   Admin panel (dynamic)   │  auth-protected
+                       │   /admin/*  Server Actions │
+                       └────────────▲─────────────┘
                                     │ logs in
-                       ┌────────────┴────────────┐
-                       │       Owner (you)       │
-                       └─────────────────────────┘
+                       ┌────────────┴─────────────┐
+                       │       Owner (you)        │
+                       └──────────────────────────┘
 ```
 
 ## The phases
@@ -56,11 +56,11 @@ This is a **single-author CMS** for publishing programming articles. It was firs
 | # | Chapter | What it delivers |
 |---|---------|------------------|
 | 1 | [Foundation](01-foundation.md) | Next.js + TypeScript + Tailwind scaffold, Prisma schema, the Prisma 7 singleton client |
-| 2 | [MDX Pipeline](02-mdx-pipeline.md) | Reading `.mdx` files, frontmatter parsing, Shiki code highlighting, the hybrid content model |
+| 2 | [MDX Pipeline](02-mdx-pipeline.md) | MDX rendering, Shiki code highlighting, smart links (originally file-based; storage moved to the DB in ch. 10) |
 | 3 | [Public Site](03-public-site.md) | Homepage, article pages, tag pages — SSG, routing, layout, components |
 | 4 | [Search & RSS](04-search-and-rss.md) | Client-side fuzzy search (Fuse.js), RSS 2.0 feed, the client/server module boundary |
 | 5 | [Auth](05-auth.md) | Auth.js credentials login, bcrypt, JWT sessions, route protection, brute-force rate limiting |
-| 6 | [Admin Panel](06-admin-panel.md) | CRUD with Server Actions, the MDX↔DB sync, tags/categories management |
+| 6 | [Admin Panel](06-admin-panel.md) | CRUD with Server Actions, tags/categories management (originally synced an MDX file + DB; now DB-only — see ch. 10) |
 | 7 | [Polish](07-polish.md) | App states, SEO (sitemap, JSON-LD, OG images), accessibility & responsiveness |
 | 8 | [Design System](08-design-system.md) | The warm-paper editorial look, fonts, light/dark theming |
 | 9 | [Table of Contents](09-table-of-contents.md) | Per-article ToC with scroll-spy — a full feature walkthrough |
@@ -71,7 +71,7 @@ This is a **single-author CMS** for publishing programming articles. It was firs
 - **Framework:** Next.js 16 (App Router) + TypeScript
 - **Styling:** Tailwind CSS v4 + `@tailwindcss/typography`
 - **Database:** PostgreSQL + Prisma 7 (driver-adapter mode, no Rust engine)
-- **Content:** MDX via `next-mdx-remote`, frontmatter via `gray-matter`
+- **Content:** MDX bodies stored in Postgres, rendered via `next-mdx-remote/rsc` (`gray-matter` only powers the admin live preview)
 - **Auth:** Auth.js v5 (`next-auth` beta) — credentials provider, single admin
 - **Code highlighting:** Shiki (build/render-time, dual light/dark theme)
 - **Search:** Fuse.js (client-side, fuzzy)
