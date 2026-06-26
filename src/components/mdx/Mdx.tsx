@@ -5,6 +5,7 @@ import {
   transformerNotationDiff,
   transformerNotationHighlight,
 } from "@shikijs/transformers";
+import remarkGfm from "remark-gfm";
 import { mdxComponents } from "./mdx-components";
 
 /**
@@ -20,6 +21,7 @@ export function Mdx({ source }: { source: string }) {
         components={mdxComponents}
         options={{
           mdxOptions: {
+            remarkPlugins: [remarkGfm],
             rehypePlugins: [
               rehypeSlug,
               [
