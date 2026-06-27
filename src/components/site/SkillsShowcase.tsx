@@ -28,7 +28,7 @@ export function SkillsShowcase() {
                     viewBox="0 0 24 24"
                     fill="currentColor"
                     aria-hidden="true"
-                    className="text-muted transition-colors duration-200 group-hover:text-[var(--brand)]"
+                    className="text-(--brand) transition-colors duration-200"
                   >
                     <path d={skill.iconPath} />
                   </svg>

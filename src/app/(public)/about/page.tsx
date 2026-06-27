@@ -2,6 +2,7 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import { Container } from "@/components/site/Container";
 import { SocialLinks } from "@/components/site/SocialLinks";
+import { SkillsShowcase } from "@/components/site/SkillsShowcase";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default function AboutPage() {
     sameAs: author.socials
       .filter((s) => s.platform !== "email")
       .map((s) => s.href),
+    knowsAbout: author.skills.flatMap((c) => c.skills.map((s) => s.name)),
   };
 
   return (
@@ -37,7 +39,7 @@ export default function AboutPage() {
           width={120}
           height={120}
           priority
-          className="h-28 w-28 flex-shrink-0 rounded-full object-cover"
+          className="h-28 w-28 shrink-0 rounded-full object-cover"
         />
         <div>
           <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">
@@ -49,6 +51,7 @@ export default function AboutPage() {
       <div className="mt-8 max-w-2xl font-prose text-lg leading-relaxed text-muted">
         <p>{author.bioLong}</p>
       </div>
+      <SkillsShowcase />
     </Container>
   );
 }
