@@ -116,7 +116,7 @@ export default async function ArticlePage({
         </header>
 
         {toc.length > 0 && (
-          <details className="mt-6 rounded-lg border border-border bg-surface px-4 py-3 xl:hidden">
+          <details className="mt-6 rounded-lg border border-border bg-surface px-4 py-3 min-[1376px]:hidden">
             <summary className="cursor-pointer font-display text-sm font-semibold text-ink">
               Contents
             </summary>
@@ -142,7 +142,7 @@ export default async function ArticlePage({
         <AuthorCard variant="article" />
       </article>
 
-      <aside className="absolute inset-y-0 left-full ml-8 hidden w-52 xl:block">
+      <aside className="absolute inset-y-0 left-full ml-8 hidden w-52 min-[1376px]:block">
         <div className="sticky top-24 max-h-[calc(100dvh-8rem)] overflow-y-auto overscroll-contain pr-2">
           <TableOfContents items={toc} />
         </div>
