@@ -9,6 +9,7 @@ import { formatDate } from "@/lib/format";
 import { site } from "@/lib/site";
 import { articleJsonLd } from "@/lib/seo";
 import { extractToc } from "@/lib/toc";
+import { AuthorCard } from "@/components/site/AuthorCard";
 
 type Params = { slug: string };
 
@@ -137,6 +138,8 @@ export default async function ArticlePage({
         <div className="mt-8">
           <Mdx source={content} />
         </div>
+
+        <AuthorCard variant="article" />
       </article>
 
       <aside className="absolute inset-y-0 left-full ml-8 hidden w-52 xl:block">
