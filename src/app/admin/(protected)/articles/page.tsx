@@ -87,6 +87,29 @@ export default async function AdminArticlesPage() {
                   <td className="py-3">
                     <div className="flex items-center gap-1">
                       <a
+                        href={`/admin/articles/${article.slug}/download`}
+                        download
+                        aria-label="Download Markdown"
+                        title="Download Markdown"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface hover:text-terracotta"
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <path d="M7 10l5 5 5-5" />
+                          <path d="M12 15V3" />
+                        </svg>
+                      </a>
+                      <a
                         href={`/articles/${article.slug}`}
                         target="_blank"
                         rel="noopener noreferrer"
