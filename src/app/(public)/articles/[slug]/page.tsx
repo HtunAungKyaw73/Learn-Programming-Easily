@@ -38,7 +38,7 @@ export async function generateMetadata({
       description: description ?? undefined,
       url: `${site.url}/articles/${slug}`,
       publishedTime: publishedAt?.toISOString(),
-      images: coverImage ? [coverImage] : undefined,
+      ...(coverImage ? { images: [coverImage] } : {}),
     },
   };
 }
