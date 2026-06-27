@@ -21,14 +21,14 @@ Let readers see, at a glance, the technologies the author works with — organiz
 
 Brand hex for each comes from the README badge colors / simple-icons official hex (finalized in the plan). Categories and skills:
 
-- **Languages:** C++, JavaScript, Python
+- **Languages:** C++, JavaScript, TypeScript Python
 - **Frontend:** React, Next.js, Redux, Tailwind CSS, MUI, shadcn/ui, Radix UI, Recharts, HTML5, CSS3
 - **Frontend Tools:** Axios, Zod, React Hook Form, TanStack Query, RTK Query, Zustand, Sass, Figma, Framer Motion
 - **Backend:** Node.js, Express, NestJS, GraphQL
-- **Backend Tools:** TypeScript, Swagger, Passport.js, JWT
+- **Backend Tools:** Swagger, Passport.js, JWT, Next-Auth
 - **Databases & ORMs:** MongoDB, PostgreSQL, Neon, Redis, Mongoose, Prisma
 - **Containers:** Docker, Kubernetes
-- **Testing & QA:** Jest, Testing Library, Cypress
+- **Testing & QA:** Jest, Vitest, Cypress
 - **DevOps & CI/CD:** AWS, Terraform, GitHub Actions, Vercel, Git
 
 Dropped (no clean single-path logo): **OOP, Functional Programming, REST**.
