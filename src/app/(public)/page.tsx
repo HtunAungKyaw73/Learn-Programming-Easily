@@ -1,6 +1,7 @@
 import { getPublicArticles } from "@/lib/queries";
 import { ArticleCard } from "@/components/site/ArticleCard";
 import { Container } from "@/components/site/Container";
+import { AuthorCard } from "@/components/site/AuthorCard";
 import { site } from "@/lib/site";
 
 export default async function HomePage() {
@@ -15,6 +16,7 @@ export default async function HomePage() {
         <p className="mt-5 max-w-xl font-prose text-xl leading-relaxed text-muted">
           {site.description}
         </p>
+        <AuthorCard variant="home" className="mt-8" />
       </section>
 
       <section className="mt-4">
