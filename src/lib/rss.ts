@@ -10,8 +10,8 @@ export async function buildRssXml(): Promise<string> {
     id: site.url,
     link: site.url,
     language: "en",
-    copyright: `© ${new Date().getFullYear()} ${site.author}`,
-    author: { name: site.author },
+    copyright: `© ${new Date().getFullYear()} ${site.author.name}`,
+    author: { name: site.author.name },
     feedLinks: { rss2: `${site.url}/rss.xml` },
   });
 

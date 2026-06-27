@@ -31,7 +31,7 @@ export async function generateMetadata({
     title,
     description: description ?? undefined,
     alternates: { canonical: `/articles/${slug}` },
-    authors: [{ name: site.author }],
+    authors: [{ name: site.author.name }],
     openGraph: {
       type: "article",
       title,
@@ -65,7 +65,7 @@ export default async function ArticlePage({
     publishedAt: publishedAtIso,
     tags,
     coverImage: article.coverImage ?? undefined,
-    authorName: site.author,
+    authorName: site.author.name,
     baseUrl: site.url,
   });
 

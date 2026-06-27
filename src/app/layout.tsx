@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     template: `%s · ${site.name}`,
   },
   description: site.description,
-  authors: [{ name: site.author }],
+  authors: [{ name: site.author.name }],
   openGraph: {
     type: "website",
     siteName: site.name,
