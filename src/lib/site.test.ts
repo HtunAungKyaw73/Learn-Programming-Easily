@@ -26,3 +26,24 @@ describe("site.author config", () => {
     expect(site.nav.some((n) => n.href === "/about")).toBe(true);
   });
 });
+
+describe("site.author.skills", () => {
+  it("has categories, each with skills", () => {
+    expect(site.author.skills.length).toBeGreaterThan(0);
+    for (const cat of site.author.skills) {
+      expect(cat.label.length).toBeGreaterThan(0);
+      expect(cat.skills.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("every skill has a name, an icon path, and a valid brand color", () => {
+    const colorRe = /^(#[0-9a-fA-F]{3,8}|var\(--[a-z-]+\))$/;
+    for (const cat of site.author.skills) {
+      for (const s of cat.skills) {
+        expect(s.name.length).toBeGreaterThan(0);
+        expect(s.iconPath.length).toBeGreaterThan(0);
+        expect(s.brandColor).toMatch(colorRe);
+      }
+    }
+  });
+});

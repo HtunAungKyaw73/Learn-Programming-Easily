@@ -2,6 +2,7 @@
  * Static site-wide configuration. Single source of truth for branding and
  * canonical URL, used by metadata, the RSS feed, and page chrome.
  */
+import { skills } from "@/lib/skills";
 
 export type SocialPlatform =
   | "github"
@@ -15,6 +16,19 @@ export interface SocialLink {
   href: string;
 }
 
+export interface Skill {
+  name: string;
+  /** Single SVG path string, drawn in a `0 0 24 24` viewBox. */
+  iconPath: string;
+  /** Official brand hex (e.g. "#61DAFB"), or "var(--ink)" for brand-black logos. */
+  brandColor: string;
+}
+
+export interface SkillCategory {
+  label: string;
+  skills: Skill[];
+}
+
 export interface Author {
   name: string;
   tagline?: string;
@@ -22,6 +36,7 @@ export interface Author {
   bioLong: string;
   avatar: string;
   socials: SocialLink[];
+  skills: SkillCategory[];
 }
 
 const author: Author = {
@@ -39,6 +54,7 @@ const author: Author = {
     },
     { platform: "email", href: "mailto:htunaungkyaw730@gmail.com" },
   ],
+  skills,
 };
 
 export const site = {
