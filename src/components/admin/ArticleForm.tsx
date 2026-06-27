@@ -48,14 +48,22 @@ export function ArticleForm({ mode, initialData }: ArticleFormProps) {
     useState<MDXRemoteSerializeResult | null>(null);
   const [previewError, setPreviewError] = useState("");
 
+  const hasContent = content.trim().length > 0;
+
   // Error state
   const [error, setError] = useState("");
 
   // Debounced preview
   useEffect(() => {
     if (!showPreview) return;
+    // Empty content: skip compiling. The render gates on `hasContent` first,
+    // so the empty-state message shows without touching state here.
+    if (!hasContent) return;
+
+    let cancelled = false;
     const timer = setTimeout(async () => {
       const result = await renderMdxPreview(content);
+      if (cancelled) return;
       if (result.ok) {
         setPreviewSource(result.source);
         setPreviewError("");
@@ -63,8 +71,11 @@ export function ArticleForm({ mode, initialData }: ArticleFormProps) {
         setPreviewError(result.error);
       }
     }, 500);
-    return () => clearTimeout(timer);
-  }, [content, showPreview]);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [content, showPreview, hasContent]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -320,12 +331,14 @@ export function ArticleForm({ mode, initialData }: ArticleFormProps) {
 
           {showPreview ? (
             <div className="min-h-[400px] rounded-md border border-border bg-surface p-6">
-              {previewError ? (
+              {!hasContent ? (
+                <p className="text-sm text-faint">Nothing to preview.</p>
+              ) : previewError ? (
                 <p className="text-sm text-red-600">{previewError}</p>
               ) : previewSource ? (
                 <MdxPreview source={previewSource} />
               ) : (
-                <p className="text-sm text-faint">Nothing to preview.</p>
+                <p className="text-sm text-faint">Compiling…</p>
               )}
             </div>
           ) : (
