@@ -185,6 +185,7 @@ export function CategoryManager({
                   </button>
                   <DeleteButton
                     icon
+                    itemName={cat.name}
                     action={() => handleDelete(cat.id)}
                     label="Delete"
                   />

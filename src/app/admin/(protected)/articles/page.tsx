@@ -155,6 +155,7 @@ export default async function AdminArticlesPage() {
                       </Link>
                       <DeleteButton
                         icon
+                        itemName={article.title}
                         action={async () => {
                           "use server";
                           await deleteArticle(article.slug);

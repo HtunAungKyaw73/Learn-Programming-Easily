@@ -186,6 +186,7 @@ export function TagManager({
                   </button>
                   <DeleteButton
                     icon
+                    itemName={`#${tag.name}`}
                     action={() => handleDelete(tag.id)}
                     label="Delete"
                   />
