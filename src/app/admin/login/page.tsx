@@ -5,27 +5,53 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { site } from "@/lib/site";
+import { z } from "zod";
+import { loginSchema } from "@/lib/validation/auth";
 
 export default function LoginPage() {
   const router = useRouter();
   const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{
+    email?: string;
+    password?: string;
+  }>({});
   const [pending, setPending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
-    setPending(true);
+    setFieldErrors({});
+
     const form = new FormData(e.currentTarget);
-    const res = await signIn("credentials", {
+    const parsed = loginSchema.safeParse({
       email: form.get("email"),
       password: form.get("password"),
+    });
+    if (!parsed.success) {
+      const fe = z.flattenError(parsed.error).fieldErrors;
+      setFieldErrors({ email: fe.email?.[0], password: fe.password?.[0] });
+      if (fe.email?.[0]) emailRef.current?.focus();
+      else if (fe.password?.[0]) passwordRef.current?.focus();
+      return;
+    }
+
+    setPending(true);
+    const res = await signIn("credentials", {
+      email: parsed.data.email,
+      password: parsed.data.password,
       redirect: false,
     });
     setPending(false);
+
     if (res?.error) {
-      setError("Invalid email or password");
+      setError(
+        res.code === "rate_limited"
+          ? "Too many failed attempts. Try again in about 15 minutes."
+          : "Invalid email or password",
+      );
       // Focus management: return focus to the first field after an error.
       emailRef.current?.focus();
       emailRef.current?.select();
@@ -72,10 +98,21 @@ export default function LoginPage() {
                 autoComplete="email"
                 autoFocus
                 required
-                aria-invalid={error ? true : undefined}
+                onChange={() =>
+                  setFieldErrors((p) =>
+                    p.email ? { ...p, email: undefined } : p,
+                  )
+                }
+                aria-invalid={fieldErrors.email ? true : undefined}
+                aria-describedby={fieldErrors.email ? "email-error" : undefined}
                 placeholder="you@example.com"
                 className="rounded-lg border border-border bg-paper px-3.5 py-2.5 text-ink outline-none transition-colors placeholder:text-faint focus:border-terracotta"
               />
+              {fieldErrors.email && (
+                <p id="email-error" className="text-sm text-terracotta-strong">
+                  {fieldErrors.email}
+                </p>
+              )}
             </div>
 
             <div className="flex flex-col gap-1.5">
@@ -87,12 +124,21 @@ export default function LoginPage() {
               </label>
               <div className="relative">
                 <input
+                  ref={passwordRef}
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
-                  aria-invalid={error ? true : undefined}
+                  onChange={() =>
+                    setFieldErrors((p) =>
+                      p.password ? { ...p, password: undefined } : p,
+                    )
+                  }
+                  aria-invalid={fieldErrors.password ? true : undefined}
+                  aria-describedby={
+                    fieldErrors.password ? "password-error" : undefined
+                  }
                   placeholder="••••••••"
                   className="w-full rounded-lg border border-border bg-paper py-2.5 pl-3.5 pr-11 text-ink outline-none transition-colors placeholder:text-faint focus:border-terracotta"
                 />
@@ -138,6 +184,11 @@ export default function LoginPage() {
                   )}
                 </button>
               </div>
+              {fieldErrors.password && (
+                <p id="password-error" className="text-sm text-terracotta-strong">
+                  {fieldErrors.password}
+                </p>
+              )}
             </div>
 
             {error && (
