@@ -32,7 +32,7 @@ describe("verifyCredentials", () => {
     findUnique.mockResolvedValue(row);
     compare.mockResolvedValue(true as never);
 
-    const result = await verifyCredentials("admin@example.com", "secret");
+    const result = await verifyCredentials("admin@example.com", "password123");
 
     expect(findUnique).toHaveBeenCalledWith({
       where: { email: "admin@example.com" },
@@ -43,19 +43,33 @@ describe("verifyCredentials", () => {
   it("returns null when the password is wrong", async () => {
     findUnique.mockResolvedValue(row);
     compare.mockResolvedValue(false as never);
-    expect(await verifyCredentials("admin@example.com", "nope")).toBeNull();
+    expect(
+      await verifyCredentials("admin@example.com", "wrongpassword"),
+    ).toBeNull();
   });
 
   it("returns null for an unknown email (no compare)", async () => {
     findUnique.mockResolvedValue(null);
-    expect(await verifyCredentials("ghost@example.com", "secret")).toBeNull();
+    expect(
+      await verifyCredentials("ghost@example.com", "password123"),
+    ).toBeNull();
     expect(compare).not.toHaveBeenCalled();
   });
 
   it("returns null for blank or non-string input (no db hit)", async () => {
-    expect(await verifyCredentials("", "secret")).toBeNull();
+    expect(await verifyCredentials("", "password123")).toBeNull();
     expect(await verifyCredentials("admin@example.com", "")).toBeNull();
     expect(await verifyCredentials(undefined, 123)).toBeNull();
+    expect(findUnique).not.toHaveBeenCalled();
+  });
+
+  it("returns null for a password shorter than 8 chars (no db hit)", async () => {
+    expect(await verifyCredentials("admin@example.com", "short")).toBeNull();
+    expect(findUnique).not.toHaveBeenCalled();
+  });
+
+  it("returns null for an invalid email (no db hit)", async () => {
+    expect(await verifyCredentials("not-an-email", "password123")).toBeNull();
     expect(findUnique).not.toHaveBeenCalled();
   });
 });
