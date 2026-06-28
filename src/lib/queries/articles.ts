@@ -101,7 +101,10 @@ export async function getPublicArticles(): Promise<ArticleListItem[]> {
       tags: { select: { name: true } },
       categories: { select: { name: true } },
     },
-    orderBy: { publishedAt: "desc" },
+    orderBy: [
+      { featured: "desc" },
+      { publishedAt: "desc" }
+    ],
   });
 
   return articles.map((a) => ({
