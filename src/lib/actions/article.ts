@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/slug";
 import { calculateReadingTime } from "@/lib/mdx";
+import { articleRevalidationPaths } from "@/lib/revalidate-paths";
 import { requireAuth } from "./auth-guard";
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -12,14 +13,7 @@ type ActionResult = { ok: true } | { ok: false; error: string };
 
 /** Revalidate every public surface an article change can affect. */
 function revalidatePublicSurfaces(slug?: string) {
-  revalidatePath("/admin");
-  revalidatePath("/admin/articles");
-  revalidatePath("/");
-  revalidatePath("/articles");
-  revalidatePath("/tags");
-  revalidatePath("/rss.xml");
-  revalidatePath("/sitemap.xml");
-  if (slug) revalidatePath(`/articles/${slug}`);
+  for (const path of articleRevalidationPaths(slug)) revalidatePath(path);
 }
 
 interface ArticleFormData {

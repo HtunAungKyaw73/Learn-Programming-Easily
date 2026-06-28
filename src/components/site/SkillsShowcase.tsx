@@ -7,7 +7,7 @@ export function SkillsShowcase() {
   return (
     <section className="mt-12">
       <h2 className="font-display text-2xl font-semibold tracking-tight text-ink">
-        Skills
+        What I have been working:
       </h2>
       <div className="mt-6 flex flex-col gap-6">
         {skills.map((category) => (
