@@ -21,6 +21,17 @@ class InvalidLoginError extends CredentialsSignin {
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
+  logger: {
+    // A rejected/locked login throws CredentialsSignin (our RateLimitError /
+    // InvalidLoginError), which Auth.js's default logger prints as a noisy
+    // stack trace on every failed attempt. That path is expected control flow
+    // — the `code` already reaches the client — so swallow it and forward
+    // every other auth error to the console untouched.
+    error(error) {
+      if (error instanceof CredentialsSignin) return;
+      console.error(error);
+    },
+  },
   callbacks: {
     ...authConfig.callbacks,
     jwt({ token, user }) {
