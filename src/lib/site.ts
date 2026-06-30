@@ -52,6 +52,7 @@ const author: Author = {
       platform: "linkedin",
       href: "https://www.linkedin.com/in/htun-aung-kyaw-385285352/",
     },
+    { platform: "website", href: "https://portfolio.htunaungkyaw.online/" },
     { platform: "email", href: "mailto:htunaungkyaw730@gmail.com" },
   ],
   skills,
