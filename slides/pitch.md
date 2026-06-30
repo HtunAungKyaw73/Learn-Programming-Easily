@@ -86,4 +86,4 @@ Spec Driven Development kept implementation aligned with design intent across 8+
 - [x] **Methodology** — Superpowers (Spec Driven Development)
 - [x] **Report generated** — [View report.md](https://github.com/HtunAungKyaw73/Learn-Programming-Easily/blob/main/report.md)
 
-**Live at:** `https://learn-programming-easily.vercel.app`
+**Live at:** `https://articles.htunaungkyaw.online`

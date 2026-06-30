@@ -144,7 +144,7 @@ MDX content with **syntax-highlighted code**, a scroll-synced **table of content
 
 ## Get started
 
-**Live:** `https://learn-programming-easily.vercel.app`
+**Live:** `https://articles.htunaungkyaw.online`
 
 **Code:** [github.com/HtunAungKyaw73/Learn-Programming-Easily](https://github.com/HtunAungKyaw73/Learn-Programming-Easily)
 

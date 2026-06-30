@@ -1,6 +1,6 @@
 # Learn Programming Easily
 
-**Live:** https://learn-programming-easily.vercel.app
+**Live:** https://articles.htunaungkyaw.online
 
 A single-author CMS for writing and publishing programming articles. The owner writes posts in an auth-protected admin panel; readers browse a fast, statically-generated public site with search, tags, RSS, and light/dark theming.
 
