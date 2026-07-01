@@ -330,7 +330,7 @@ export function ArticleForm({ mode, initialData }: ArticleFormProps) {
           </div>
 
           {showPreview ? (
-            <div className="min-h-[400px] rounded-md border border-border bg-surface p-6">
+            <div className="w-full h-150 overflow-auto rounded-md border border-border bg-surface p-3">
               {!hasContent ? (
                 <p className="text-sm text-faint">Nothing to preview.</p>
               ) : previewError ? (
@@ -346,9 +346,9 @@ export function ArticleForm({ mode, initialData }: ArticleFormProps) {
               id="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              rows={20}
+              rows={29}
               placeholder="Write your MDX content here…"
-              className="w-full rounded-md border border-border bg-surface px-3 py-2 font-mono text-sm text-ink outline-none transition-colors focus:border-terracotta"
+              className="w-full rounded-md border border-border bg-surface px-3 py-3 font-mono text-sm text-ink outline-none transition-colors focus:border-terracotta"
             />
           )}
         </div>

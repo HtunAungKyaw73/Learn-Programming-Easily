@@ -4,8 +4,9 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/slug";
 import { calculateReadingTime } from "@/lib/mdx";
-import { articleRevalidationPaths } from "@/lib/revalidate-paths";
+import { articleRevalidationPaths, taxonomyRevalidationPaths } from "@/lib/revalidate-paths";
 import { requireAuth } from "./auth-guard";
+import { ArticleMeta } from "@/types";
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -16,6 +17,39 @@ function revalidatePublicSurfaces(slug?: string) {
   for (const path of articleRevalidationPaths(slug)) revalidatePath(path);
 }
 
+/**
+ * Revalidate tags/categories that were added/removed from an article, plus the public surfaces the article change hits. This is called after an article create/update/delete.
+ */
+async function revalidateArticleTaxonomyChanges(
+  newArticle: ArticleMeta,
+  newTagNames: string[],
+  newCategoryNames: string[],
+) {
+  const currentTagNames = newArticle.tags.map((t) => t.name);
+  const currentCategoryNames = newArticle.categories.map((c) => c.name);
+
+  const removedTagNames = currentTagNames.filter((n) => !newTagNames.includes(n));
+  const removedCategoryNames = currentCategoryNames.filter(
+    (n) => !newCategoryNames.includes(n),
+  );
+
+  // Revalidate the admin tag/category
+  revalidatePath("/admin/tags");
+  revalidatePath("/admin/categories");
+
+  // Revalidate the public surfaces
+  revalidatePublicSurfaces(newArticle.slug);
+
+  // Revalidate the old and new tags
+  for (const path of taxonomyRevalidationPaths({
+    tagNames: [...removedTagNames, ...newTagNames],
+  })) revalidatePath(path);
+
+  // Revalidate the old and new categories
+  for (const path of taxonomyRevalidationPaths({
+    tagNames: [...removedCategoryNames, ...newCategoryNames],
+  })) revalidatePath(path);
+}
 interface ArticleFormData {
   title: string;
   slug: string;
@@ -76,7 +110,7 @@ export async function createArticle(data: ArticleFormData): Promise<ActionResult
   try {
     const readingTime = calculateReadingTime(data.content);
 
-    await prisma.article.create({
+    const newArticle = await prisma.article.create({
       data: {
         slug,
         title: data.title,
@@ -90,9 +124,11 @@ export async function createArticle(data: ArticleFormData): Promise<ActionResult
         tags: { connect: await upsertTags(data.tagNames) },
         categories: { connect: await upsertCategories(data.categoryNames) },
       },
+      include: { tags: true, categories: true },
     });
 
-    revalidatePublicSurfaces(slug);
+    await revalidateArticleTaxonomyChanges(newArticle, data.tagNames, data.categoryNames);
+
     return { ok: true };
   } catch (err) {
     return { ok: false, error: `Failed to create article: ${String(err)}` };
@@ -138,7 +174,7 @@ export async function updateArticle(
     const toConnectCats = data.categoryNames.filter((n) => !currentCatNames.includes(n));
     const toDisconnectCats = currentCatNames.filter((n) => !data.categoryNames.includes(n));
 
-    await prisma.article.update({
+    const updatedArticle = await prisma.article.update({
       where: { slug: originalSlug },
       data: {
         slug,
@@ -159,9 +195,14 @@ export async function updateArticle(
           disconnect: toDisconnectCats.map((name) => ({ name })),
         },
       },
+      include: { tags: true, categories: true },
     });
 
-    revalidatePublicSurfaces(slug);
+    await revalidateArticleTaxonomyChanges(
+      updatedArticle,
+      data.tagNames,
+      data.categoryNames,
+    );
     if (slug !== originalSlug) revalidatePath(`/articles/${originalSlug}`);
     return { ok: true };
   } catch (err) {
