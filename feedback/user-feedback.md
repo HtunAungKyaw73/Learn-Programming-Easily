@@ -19,4 +19,3 @@
 
 - [ ] Add tag filtering to the search dialog
 - [ ] Add a "featured" or "recent" section on the homepage
-- [ ] Improve mobile navigation (hamburger menu overflow)

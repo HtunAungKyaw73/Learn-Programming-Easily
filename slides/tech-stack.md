@@ -71,7 +71,7 @@ style: |
 | **Language** | TypeScript |
 | **Database** | PostgreSQL + Prisma 7 |
 | **Auth** | Auth.js v5 (credentials, bcrypt + JWT) |
-| **Content** | MDX files (hybrid: files + DB metadata) |
+| **Content** | Data stored in Db as markdown|
 | **Search** | Fuse.js (client-side, Cmd+K) |
 | **Syntax Highlighting** | Shiki (light + dark themes) |
 | **Testing** | Vitest |
