@@ -1,6 +1,7 @@
 import { ViewTransition } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
+import { RefreshOnFocus } from "@/components/site/RefreshOnFocus";
 
 export default function PublicLayout({
   children,
@@ -20,6 +21,7 @@ export default function PublicLayout({
         <ViewTransition>{children}</ViewTransition>
       </main>
       <Footer />
+      <RefreshOnFocus />
     </>
   );
 }
