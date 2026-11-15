@@ -11,17 +11,27 @@ vi.mock("@/lib/prisma", () => ({
 }));
 
 import { prisma } from "@/lib/prisma";
-import { createArticle, togglePublished } from "@/lib/actions/article";
+import { revalidatePath } from "next/cache";
+import {
+  createArticle,
+  deleteArticle,
+  togglePublished,
+  updateArticle,
+} from "@/lib/actions/article";
 
 const findUnique = vi.mocked(prisma.article.findUnique);
 const create = vi.mocked(prisma.article.create);
 const update = vi.mocked(prisma.article.update);
+const del = vi.mocked(prisma.article.delete);
+const tagUpsert = vi.mocked(prisma.tag.upsert);
 
 beforeEach(() => {
   findUnique.mockReset();
   create.mockReset();
   update.mockReset();
-  vi.resetModules();
+  del.mockReset();
+  tagUpsert.mockReset();
+  vi.mocked(revalidatePath).mockClear();
 });
 
 const form = {
@@ -53,16 +63,85 @@ describe("createArticle", () => {
   });
 });
 
+describe("updateArticle", () => {
+  it("revalidates the page of a tag removed from the article", async () => {
+    // Before: tagged react + typescript. After: typescript only.
+    findUnique.mockResolvedValue({
+      id: 1,
+      slug: "hello-world",
+      tags: [{ name: "react" }, { name: "typescript" }],
+      categories: [],
+    } as never);
+    update.mockResolvedValue({ id: 1 } as never);
+
+    const result = await updateArticle("hello-world", {
+      ...form,
+      tagNames: ["typescript"],
+    });
+
+    expect(result).toEqual({ ok: true });
+    expect(revalidatePath).toHaveBeenCalledWith("/tags/react");
+    expect(revalidatePath).toHaveBeenCalledWith("/tags/typescript");
+  });
+
+  it("revalidates the old article path when the slug changes", async () => {
+    findUnique
+      .mockResolvedValueOnce(null as never) // slug-conflict check
+      .mockResolvedValueOnce({ id: 1, slug: "hello-world", tags: [], categories: [] } as never);
+    update.mockResolvedValue({ id: 1 } as never);
+
+    await updateArticle("hello-world", { ...form, slug: "hello-again" });
+
+    expect(revalidatePath).toHaveBeenCalledWith("/articles/hello-world");
+    expect(revalidatePath).toHaveBeenCalledWith("/articles/hello-again");
+  });
+});
+
+describe("deleteArticle", () => {
+  it("revalidates the tag pages the deleted article was listed on", async () => {
+    findUnique.mockResolvedValue({
+      id: 1,
+      slug: "hello-world",
+      tags: [{ name: "react" }],
+    } as never);
+    del.mockResolvedValue({ id: 1 } as never);
+
+    const result = await deleteArticle("hello-world");
+
+    expect(result).toEqual({ ok: true });
+    expect(revalidatePath).toHaveBeenCalledWith("/tags/react");
+    expect(revalidatePath).toHaveBeenCalledWith("/articles/hello-world");
+  });
+});
+
 describe("togglePublished", () => {
   it("revalidates the article page, tags, and sitemap", async () => {
-    findUnique.mockResolvedValue({ id: 1, slug: "hello-world", published: false } as never);
+    findUnique.mockResolvedValue({
+      id: 1,
+      slug: "hello-world",
+      published: false,
+      tags: [],
+    } as never);
     update.mockResolvedValue({ id: 1 } as never);
-    const { revalidatePath } = await import("next/cache");
 
     await togglePublished("hello-world");
 
     expect(revalidatePath).toHaveBeenCalledWith("/articles/hello-world");
     expect(revalidatePath).toHaveBeenCalledWith("/tags");
     expect(revalidatePath).toHaveBeenCalledWith("/sitemap.xml");
+  });
+
+  it("revalidates the tag pages the article appears on", async () => {
+    findUnique.mockResolvedValue({
+      id: 1,
+      slug: "hello-world",
+      published: true,
+      tags: [{ name: "react" }],
+    } as never);
+    update.mockResolvedValue({ id: 1 } as never);
+
+    await togglePublished("hello-world");
+
+    expect(revalidatePath).toHaveBeenCalledWith("/tags/react");
   });
 });

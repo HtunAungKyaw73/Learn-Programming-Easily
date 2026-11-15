@@ -21,6 +21,27 @@ export function articleRevalidationPaths(slug?: string): string[] {
 }
 
 /**
+ * Paths to revalidate after a mutation to one article, including the tag pages
+ * that list it.
+ *
+ * `tagNames` must be the union of the article's tags BEFORE and AFTER the
+ * change: a tag removed by the edit is exactly the `/tags/<name>` page that
+ * would otherwise keep listing the article. `previousSlug` covers a rename.
+ */
+export function articleChangeRevalidationPaths(opts: {
+  slug: string;
+  previousSlug?: string;
+  tagNames: string[];
+}): string[] {
+  const { slug, previousSlug, tagNames } = opts;
+  return dedupe([
+    ...articleRevalidationPaths(slug),
+    ...(previousSlug ? [`/articles/${previousSlug}`] : []),
+    ...tagNames.map((name) => `/tags/${name}`),
+  ]);
+}
+
+/**
  * Paths to revalidate after a tag/category mutation.
  *
  * `tagNames` → each tag's own `/tags/<name>` page (pass both old and new on a

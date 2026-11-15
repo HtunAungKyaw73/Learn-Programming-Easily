@@ -4,52 +4,33 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/slug";
 import { calculateReadingTime } from "@/lib/mdx";
-import { articleRevalidationPaths, taxonomyRevalidationPaths } from "@/lib/revalidate-paths";
+import { articleChangeRevalidationPaths } from "@/lib/revalidate-paths";
 import { requireAuth } from "./auth-guard";
-import { ArticleMeta } from "@/types";
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 type ActionResult = { ok: true } | { ok: false; error: string };
 
-/** Revalidate every public surface an article change can affect. */
-function revalidatePublicSurfaces(slug?: string) {
-  for (const path of articleRevalidationPaths(slug)) revalidatePath(path);
-}
-
 /**
- * Revalidate tags/categories that were added/removed from an article, plus the public surfaces the article change hits. This is called after an article create/update/delete.
+ * Revalidate every surface an article change can affect: the admin lists, the
+ * shared public surfaces (listings, feed, sitemap), the article page itself,
+ * and each tag page that lists it.
+ *
+ * `tagNames` must cover the article's tags from BEFORE the write as well as
+ * after — callers read the old tags first, since a removed tag is the one
+ * whose `/tags/<name>` page would otherwise go stale. Categories have no
+ * public pages, so only their admin list needs refreshing.
  */
-async function revalidateArticleTaxonomyChanges(
-  newArticle: ArticleMeta,
-  newTagNames: string[],
-  newCategoryNames: string[],
-) {
-  const currentTagNames = newArticle.tags.map((t) => t.name);
-  const currentCategoryNames = newArticle.categories.map((c) => c.name);
-
-  const removedTagNames = currentTagNames.filter((n) => !newTagNames.includes(n));
-  const removedCategoryNames = currentCategoryNames.filter(
-    (n) => !newCategoryNames.includes(n),
-  );
-
-  // Revalidate the admin tag/category
+function revalidatePublicSurfaces(opts: {
+  slug: string;
+  previousSlug?: string;
+  tagNames: string[];
+}) {
   revalidatePath("/admin/tags");
   revalidatePath("/admin/categories");
-
-  // Revalidate the public surfaces
-  revalidatePublicSurfaces(newArticle.slug);
-
-  // Revalidate the old and new tags
-  for (const path of taxonomyRevalidationPaths({
-    tagNames: [...removedTagNames, ...newTagNames],
-  })) revalidatePath(path);
-
-  // Revalidate the old and new categories
-  for (const path of taxonomyRevalidationPaths({
-    tagNames: [...removedCategoryNames, ...newCategoryNames],
-  })) revalidatePath(path);
+  for (const path of articleChangeRevalidationPaths(opts)) revalidatePath(path);
 }
+
 interface ArticleFormData {
   title: string;
   slug: string;
@@ -110,7 +91,7 @@ export async function createArticle(data: ArticleFormData): Promise<ActionResult
   try {
     const readingTime = calculateReadingTime(data.content);
 
-    const newArticle = await prisma.article.create({
+    await prisma.article.create({
       data: {
         slug,
         title: data.title,
@@ -124,10 +105,9 @@ export async function createArticle(data: ArticleFormData): Promise<ActionResult
         tags: { connect: await upsertTags(data.tagNames) },
         categories: { connect: await upsertCategories(data.categoryNames) },
       },
-      include: { tags: true, categories: true },
     });
 
-    await revalidateArticleTaxonomyChanges(newArticle, data.tagNames, data.categoryNames);
+    revalidatePublicSurfaces({ slug, tagNames: data.tagNames });
 
     return { ok: true };
   } catch (err) {
@@ -174,7 +154,7 @@ export async function updateArticle(
     const toConnectCats = data.categoryNames.filter((n) => !currentCatNames.includes(n));
     const toDisconnectCats = currentCatNames.filter((n) => !data.categoryNames.includes(n));
 
-    const updatedArticle = await prisma.article.update({
+    await prisma.article.update({
       where: { slug: originalSlug },
       data: {
         slug,
@@ -195,15 +175,15 @@ export async function updateArticle(
           disconnect: toDisconnectCats.map((name) => ({ name })),
         },
       },
-      include: { tags: true, categories: true },
     });
 
-    await revalidateArticleTaxonomyChanges(
-      updatedArticle,
-      data.tagNames,
-      data.categoryNames,
-    );
-    if (slug !== originalSlug) revalidatePath(`/articles/${originalSlug}`);
+    // Old tags were read before the write: a tag just removed still needs its
+    // page refreshed, and it is no longer on the updated row.
+    revalidatePublicSurfaces({
+      slug,
+      previousSlug: originalSlug,
+      tagNames: [...currentTagNames, ...data.tagNames],
+    });
     return { ok: true };
   } catch (err) {
     return { ok: false, error: `Failed to update article: ${String(err)}` };
@@ -214,9 +194,17 @@ export async function deleteArticle(slug: string): Promise<ActionResult> {
   await requireAuth();
 
   try {
+    // Capture the tags BEFORE deleting — the relation is gone afterward, so
+    // this is the only chance to learn which tag pages listed the article.
+    const article = await prisma.article.findUnique({
+      where: { slug },
+      include: { tags: { select: { name: true } } },
+    });
+    if (!article) return { ok: false, error: "Article not found." };
+
     await prisma.article.delete({ where: { slug } });
 
-    revalidatePublicSurfaces(slug);
+    revalidatePublicSurfaces({ slug, tagNames: article.tags.map((t) => t.name) });
     return { ok: true };
   } catch (err) {
     return { ok: false, error: `Failed to delete article: ${String(err)}` };
@@ -227,7 +215,10 @@ export async function togglePublished(slug: string): Promise<ActionResult> {
   await requireAuth();
 
   try {
-    const article = await prisma.article.findUnique({ where: { slug } });
+    const article = await prisma.article.findUnique({
+      where: { slug },
+      include: { tags: { select: { name: true } } },
+    });
     if (!article) return { ok: false, error: "Article not found." };
 
     const newPublished = !article.published;
@@ -236,7 +227,7 @@ export async function togglePublished(slug: string): Promise<ActionResult> {
       data: { published: newPublished },
     });
 
-    revalidatePublicSurfaces(slug);
+    revalidatePublicSurfaces({ slug, tagNames: article.tags.map((t) => t.name) });
     return { ok: true };
   } catch (err) {
     return { ok: false, error: `Failed to toggle publish: ${String(err)}` };
@@ -247,7 +238,10 @@ export async function toggleFeatured(slug: string): Promise<ActionResult> {
   await requireAuth();
 
   try {
-    const article = await prisma.article.findUnique({ where: { slug } });
+    const article = await prisma.article.findUnique({
+      where: { slug },
+      include: { tags: { select: { name: true } } },
+    });
     if (!article) return { ok: false, error: "Article not found." };
 
     const newFeatured = !article.featured;
@@ -256,7 +250,7 @@ export async function toggleFeatured(slug: string): Promise<ActionResult> {
       data: { featured: newFeatured },
     });
 
-    revalidatePublicSurfaces(slug);
+    revalidatePublicSurfaces({ slug, tagNames: article.tags.map((t) => t.name) });
     return { ok: true };
   } catch (err) {
     return { ok: false, error: `Failed to toggle featured: ${String(err)}` };
