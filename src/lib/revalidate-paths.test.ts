@@ -1,8 +1,49 @@
 import { describe, it, expect } from "vitest";
 import {
+  articleChangeRevalidationPaths,
   articleRevalidationPaths,
   taxonomyRevalidationPaths,
 } from "./revalidate-paths";
+
+describe("articleChangeRevalidationPaths", () => {
+  it("revalidates the page of a tag that was removed from the article", () => {
+    // Regression: dropping the "react" tag from an article left /tags/react
+    // still listing it, because only the post-update tags were revalidated.
+    const paths = articleChangeRevalidationPaths({
+      slug: "hello-world",
+      tagNames: ["react", "typescript"], // before ∪ after
+    });
+    expect(paths).toContain("/tags/react");
+    expect(paths).toContain("/tags/typescript");
+  });
+
+  it("revalidates both the old and new article paths on a slug rename", () => {
+    const paths = articleChangeRevalidationPaths({
+      slug: "hello-world-2",
+      previousSlug: "hello-world",
+      tagNames: [],
+    });
+    expect(paths).toContain("/articles/hello-world-2");
+    expect(paths).toContain("/articles/hello-world");
+  });
+
+  it("includes the admin and shared public surfaces", () => {
+    const paths = articleChangeRevalidationPaths({ slug: "x", tagNames: [] });
+    for (const p of ["/admin", "/admin/articles", "/", "/articles", "/tags", "/rss.xml", "/sitemap.xml"]) {
+      expect(paths).toContain(p);
+    }
+  });
+
+  it("dedupes a tag present both before and after the change", () => {
+    const paths = articleChangeRevalidationPaths({
+      slug: "x",
+      previousSlug: "x",
+      tagNames: ["react", "react"],
+    });
+    expect(paths.filter((p) => p === "/tags/react")).toHaveLength(1);
+    expect(paths.filter((p) => p === "/articles/x")).toHaveLength(1);
+  });
+});
 
 describe("taxonomyRevalidationPaths", () => {
   it("revalidates the deleted tag's own page and each affected article", () => {
