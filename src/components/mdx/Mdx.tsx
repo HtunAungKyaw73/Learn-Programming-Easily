@@ -1,17 +1,11 @@
 import { MDXRemote } from "next-mdx-remote/rsc";
-import rehypeShiki from "@shikijs/rehype";
-import rehypeSlug from "rehype-slug";
-import {
-  transformerNotationDiff,
-  transformerNotationHighlight,
-} from "@shikijs/transformers";
-import remarkGfm from "remark-gfm";
+import { mdxOptions } from "@/lib/mdx-options";
 import { mdxComponents } from "./mdx-components";
 
 /**
- * Server-rendered MDX article body. Code blocks are highlighted at build/render
- * time by Shiki with a light+dark dual theme (CSS-variable based, switched by
- * the `prefers-color-scheme` rules in globals.css).
+ * Server-rendered MDX article body. The plugin pipeline (GFM, Mermaid blocks,
+ * heading slugs, Shiki highlighting) lives in `lib/mdx-options.ts`, shared
+ * with the admin preview.
  */
 export function Mdx({ source }: { source: string }) {
   return (
@@ -19,24 +13,7 @@ export function Mdx({ source }: { source: string }) {
       <MDXRemote
         source={source}
         components={mdxComponents}
-        options={{
-          mdxOptions: {
-            remarkPlugins: [remarkGfm],
-            rehypePlugins: [
-              rehypeSlug,
-              [
-                rehypeShiki,
-                {
-                  themes: { light: "github-light", dark: "github-dark" },
-                  transformers: [
-                    transformerNotationDiff(),
-                    transformerNotationHighlight(),
-                  ],
-                },
-              ],
-            ],
-          },
-        }}
+        options={{ mdxOptions }}
       />
     </div>
   );

@@ -3,12 +3,7 @@
 import matter from "gray-matter";
 import { serialize } from "next-mdx-remote/serialize";
 import type { MDXRemoteSerializeResult } from "next-mdx-remote";
-import rehypeShiki from "@shikijs/rehype";
-import rehypeSlug from "rehype-slug";
-import {
-  transformerNotationDiff,
-  transformerNotationHighlight,
-} from "@shikijs/transformers";
+import { mdxOptions } from "@/lib/mdx-options";
 import { requireAuth } from "./auth-guard";
 
 /**
@@ -20,8 +15,8 @@ import { requireAuth } from "./auth-guard";
  * suspended a page-level boundary and flashed a full reload on every preview).
  *
  * Frontmatter is stripped because it's already shown in the form fields. The
- * rehype pipeline mirrors `components/mdx/Mdx.tsx` so the preview matches the
- * published article exactly.
+ * plugin pipeline is the shared `mdxOptions`, the same object the published
+ * article renders with, so the preview matches it exactly.
  */
 export async function renderMdxPreview(
   content: string,
@@ -32,23 +27,7 @@ export async function renderMdxPreview(
 
   try {
     const { content: body } = matter(content);
-    const source = await serialize(body, {
-      mdxOptions: {
-        rehypePlugins: [
-          rehypeSlug,
-          [
-            rehypeShiki,
-            {
-              themes: { light: "github-light", dark: "github-dark" },
-              transformers: [
-                transformerNotationDiff(),
-                transformerNotationHighlight(),
-              ],
-            },
-          ],
-        ],
-      },
-    });
+    const source = await serialize(body, { mdxOptions });
     return { ok: true, source };
   } catch (err) {
     return { ok: false, error: `Failed to parse MDX: ${String(err)}` };
