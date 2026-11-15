@@ -2,6 +2,10 @@ import { describe, it, expect, vi } from "vitest";
 
 vi.mock("./auth-guard", () => ({ requireAuth: vi.fn() }));
 
+// The first compile loads Shiki's grammars and themes, which takes a few
+// seconds and timed out at the 5s default whenever the machine was busy.
+vi.setConfig({ testTimeout: 30_000 });
+
 import { renderMdxPreview } from "./preview";
 
 describe("renderMdxPreview", () => {

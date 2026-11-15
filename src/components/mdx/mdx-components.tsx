@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { MDXComponents } from "mdx/types";
+import { Mermaid } from "./Mermaid";
 
 /**
  * Custom element overrides for rendered MDX. Most prose styling comes from the
@@ -7,6 +8,8 @@ import type { MDXComponents } from "mdx/types";
  * like client-side navigation for internal links.
  */
 export const mdxComponents: MDXComponents = {
+  // Target of the ```mermaid → <Mermaid chart="…" /> rewrite (remark-mermaid).
+  Mermaid,
   a: ({ href = "", children, ...props }) => {
     const isInternal = href.startsWith("/") || href.startsWith("#");
     if (isInternal) {

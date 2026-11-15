@@ -98,6 +98,44 @@ body {
   font-weight: var(--shiki-dark-font-weight) !important;
   text-decoration: var(--shiki-dark-text-decoration) !important;
 }
+/* --- Mermaid diagrams (components/mdx/Mermaid.tsx) --- */
+.mermaid-diagram {
+  margin: 1.75em 0;
+  /* A wide diagram scrolls inside its own box, never the page. */
+  overflow-x: auto;
+  text-align: center;
+}
+.mermaid-diagram > svg {
+  display: inline-block;
+  height: auto;
+  /* Mermaid shrinks a diagram to fit its container. The component sets the
+     floor (75% of its natural size); below that the labels are unreadable on
+     a phone, so the diagram scrolls sideways instead. */
+  min-width: var(--mermaid-min-width, 0px);
+}
+/* Source shown before the diagram loads, without JS, or on a syntax error:
+   same card as a Shiki code block. */
+.mermaid-source {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: var(--ink);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+}
+.mermaid-error {
+  margin-top: 0.5rem;
+  text-align: left;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  color: var(--terracotta);
+}
+
 .prose :where(code):not(:where(pre *))::before,
 .prose :where(code):not(:where(pre *))::after {
   content: none;
